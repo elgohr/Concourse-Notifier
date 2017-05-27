@@ -31,21 +31,21 @@ class Notification {
 
     def addComponentsToFrame(Container container) {
         def contentPanel = new JPanel()
-        def border = BorderFactory.createMatteBorder(1, 1, 1, 1, ConcourseColors.getTitleBarColor())
+        def border = BorderFactory.createMatteBorder(1, 1, 1, 1, ConcourseColors.TITLEBAR_BACKGROUND)
         contentPanel.setBorder(border)
-        contentPanel.setBackground(ConcourseColors.getBackgroundColor())
+        contentPanel.setBackground(ConcourseColors.BACKGROUND)
         contentPanel.setLayout(new BorderLayout())
         container.add(contentPanel)
 
         def titleLabel = new JLabel(title)
-        titleLabel.setForeground(ConcourseColors.getTextColor())
-        titleLabel.setBackground(ConcourseColors.getTitleBarColor())
+        titleLabel.setForeground(ConcourseColors.TEXT)
+        titleLabel.setBackground(ConcourseColors.TITLEBAR_BACKGROUND)
         titleLabel.setOpaque(true)
         titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5))
         contentPanel.add(titleLabel, BorderLayout.PAGE_START)
 
         def contentLabel = new JLabel(content)
-        contentLabel.setForeground(ConcourseColors.getTextColor())
+        contentLabel.setForeground(ConcourseColors.TEXT)
         setBackgroundColorByStatus(contentLabel)
         contentPanel.add(contentLabel, BorderLayout.CENTER)
     }
@@ -66,7 +66,7 @@ class Notification {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE)
         frame.setUndecorated(true)
         frame.setPreferredSize(new Dimension(300, 150))
-        frame.getContentPane().setBackground(ConcourseColors.getTextColor())
+        frame.getContentPane().setBackground(ConcourseColors.TEXT)
         frame
     }
 
@@ -74,25 +74,25 @@ class Notification {
         label.setOpaque(true)
         switch (status) {
             case "pending":
-                label.setBackground(ConcourseColors.getPendingColor())
+                label.setBackground(ConcourseColors.STATUS_PENDING)
                 break
             case "started":
-                label.setBackground(ConcourseColors.getStartedColor())
+                label.setBackground(ConcourseColors.STATUS_STARTED)
                 break
             case "failed":
-                label.setBackground(ConcourseColors.getFailedColor())
+                label.setBackground(ConcourseColors.STATUS_FAILED)
                 break
             case "errored":
-                label.setBackground(ConcourseColors.getErroredColor())
+                label.setBackground(ConcourseColors.STATUS_ERRORED)
                 break
             case "aborted":
-                label.setBackground(ConcourseColors.getAbortedColor())
+                label.setBackground(ConcourseColors.STATUS_ABORTED)
                 break
             case "paused":
-                label.setBackground(ConcourseColors.getPausedColor())
+                label.setBackground(ConcourseColors.STATUS_PAUSED)
                 break
             case "succeeded":
-                label.setBackground(ConcourseColors.getSucceededColor())
+                label.setBackground(ConcourseColors.STATUS_SUCCEEDED)
                 break
         }
     }
