@@ -1,20 +1,22 @@
 package com.elgohr.concourse.notifier.notifications
 
-import com.elgohr.concourse.notifier.api.ConcourseService
+import com.elgohr.concourse.notifier.ConcourseService
+import com.elgohr.concourse.notifier.NotificationFactory
+import com.elgohr.concourse.notifier.NotificationScheduler
 import com.elgohr.concourse.notifier.api.Job
 
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class NotificationScheduler {
+class NotificationSchedulerImpl implements NotificationScheduler {
 
     def jobBuffer = [] as HashMap<String, Job>
     def final concourseService
     def final notificationFactory
     def checker = Executors.newScheduledThreadPool(1)
 
-    NotificationScheduler(ConcourseService concourseService,
-                          NotificationFactory notificationFactory) {
+    NotificationSchedulerImpl(ConcourseService concourseService,
+                              NotificationFactory notificationFactory) {
         this.concourseService = concourseService
         this.notificationFactory = notificationFactory
     }

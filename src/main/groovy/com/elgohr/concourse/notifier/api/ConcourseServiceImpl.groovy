@@ -1,20 +1,21 @@
 package com.elgohr.concourse.notifier.api
 
+import com.elgohr.concourse.notifier.ConcourseService
 import groovy.json.JsonSlurper
 
-class ConcourseService {
+class ConcourseServiceImpl implements ConcourseService{
 
     def static final JOBS_URL = "/api/v1/teams/main/pipelines/main/jobs"
 
     def final jobsEndpoint
     def final jsonSlurper
 
-    ConcourseService(URL endpoint) {
+    ConcourseServiceImpl(URL endpoint) {
         this.jsonSlurper = new JsonSlurper()
         this.jobsEndpoint = new URL(endpoint.toString() + JOBS_URL)
     }
 
-    def getJobs() {
+    List getJobs() {
         def responseContent = jobsEndpoint.text
         def response = jsonSlurper.parseText responseContent
         def newJobs = [] as List

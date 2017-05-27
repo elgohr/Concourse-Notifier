@@ -2,12 +2,12 @@ package com.elgohr.concourse.notifier.api
 
 import spock.lang.Specification
 
-class ConcourseServiceTest extends Specification {
+class ConcourseServiceImplTest extends Specification {
 
     def wrapper
 
     def setup() {
-        wrapper = new ConcourseService(new URL("http://ci.endpoint"))
+        wrapper = new ConcourseServiceImpl(new URL("http://ci.endpoint"))
     }
 
     def "unwraps jobs from concourse response"() {

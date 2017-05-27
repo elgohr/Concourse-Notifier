@@ -1,8 +1,8 @@
 package com.elgohr.concourse.notifier
 
-import com.elgohr.concourse.notifier.api.ConcourseService
-import com.elgohr.concourse.notifier.notifications.NotificationFactory
-import com.elgohr.concourse.notifier.notifications.NotificationScheduler
+import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
+import com.elgohr.concourse.notifier.notifications.NotificationFactoryImpl
+import com.elgohr.concourse.notifier.notifications.NotificationSchedulerImpl
 
 class ConcourseNotifier {
 
@@ -15,9 +15,9 @@ class ConcourseNotifier {
     }
 
     ConcourseNotifier(URL url) {
-        concourseService = new ConcourseService(url)
-        notificationFactory = new NotificationFactory()
-        notificationScheduler = new NotificationScheduler(concourseService, notificationFactory)
+        concourseService = new ConcourseServiceImpl(url)
+        notificationFactory = new NotificationFactoryImpl()
+        notificationScheduler = new NotificationSchedulerImpl(concourseService, notificationFactory)
         notificationScheduler.startCheck()
     }
 

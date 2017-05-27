@@ -1,10 +1,10 @@
 package com.elgohr.concourse.notifier.notifications
 
-import com.elgohr.concourse.notifier.api.ConcourseService
+import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
 import com.elgohr.concourse.notifier.api.Job
 import spock.lang.Specification
 
-class NotificationSchedulerTest extends Specification {
+class NotificationSchedulerImplTest extends Specification {
 
     def scheduler
     def mockConcourseService
@@ -12,9 +12,9 @@ class NotificationSchedulerTest extends Specification {
 
     void setup() {
         def arguments = [new URL("http://any")]
-        mockConcourseService = Mock(ConcourseService, constructorArgs: arguments)
-        mockNotificationFactory = Mock(NotificationFactory)
-        scheduler = new NotificationScheduler(mockConcourseService, mockNotificationFactory)
+        mockConcourseService = Mock(ConcourseServiceImpl, constructorArgs: arguments)
+        mockNotificationFactory = Mock(NotificationFactoryImpl)
+        scheduler = new NotificationSchedulerImpl(mockConcourseService, mockNotificationFactory)
     }
 
     void cleanup() {
