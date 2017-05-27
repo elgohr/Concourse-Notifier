@@ -13,11 +13,11 @@ import java.awt.event.WindowEvent
 class Notification {
 
     def static final NOTIFICATION_TIMEOUT = 5000
-    def final title, content, status
+    def final pipeline, jobName, status
 
-    Notification(String title, String content, String status) {
-        this.title = title
-        this.content = content
+    Notification(String pipeline, String jobName, String status) {
+        this.pipeline = pipeline
+        this.jobName = jobName
         this.status = status
         showNotification()
     }
@@ -31,22 +31,16 @@ class Notification {
 
     def addComponentsToFrame(Container container) {
         def contentPanel = new JPanel()
-        def border = BorderFactory.createMatteBorder(1, 1, 1, 1, ConcourseColors.TITLEBAR_BACKGROUND)
+        def backgroundColor = getBackgroundColorByStatus()
+        def border = BorderFactory.createMatteBorder(5, 5, 5, 5, backgroundColor)
         contentPanel.setBorder(border)
         contentPanel.setBackground(ConcourseColors.BACKGROUND)
         contentPanel.setLayout(new BorderLayout())
         container.add(contentPanel)
 
-        def titleLabel = new JLabel(title)
-        titleLabel.setForeground(ConcourseColors.TEXT)
-        titleLabel.setBackground(ConcourseColors.TITLEBAR_BACKGROUND)
-        titleLabel.setOpaque(true)
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5))
-        contentPanel.add(titleLabel, BorderLayout.PAGE_START)
-
-        def contentLabel = new JLabel(content)
+        def contentLabel = new JLabel("$pipeline - $jobName")
         contentLabel.setForeground(ConcourseColors.TEXT)
-        setBackgroundColorByStatus(contentLabel)
+        contentLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5))
         contentPanel.add(contentLabel, BorderLayout.CENTER)
     }
 
@@ -65,34 +59,33 @@ class Notification {
         def frame = new JFrame()
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE)
         frame.setUndecorated(true)
-        frame.setPreferredSize(new Dimension(300, 150))
+        frame.setPreferredSize(new Dimension(300, 75))
         frame.getContentPane().setBackground(ConcourseColors.TEXT)
         frame
     }
 
-    def setBackgroundColorByStatus(JLabel label) {
-        label.setOpaque(true)
+    def getBackgroundColorByStatus() {
         switch (status) {
             case "pending":
-                label.setBackground(ConcourseColors.STATUS_PENDING)
+                return ConcourseColors.STATUS_PENDING
                 break
             case "started":
-                label.setBackground(ConcourseColors.STATUS_STARTED)
+                return ConcourseColors.STATUS_STARTED
                 break
             case "failed":
-                label.setBackground(ConcourseColors.STATUS_FAILED)
+                return ConcourseColors.STATUS_FAILED
                 break
             case "errored":
-                label.setBackground(ConcourseColors.STATUS_ERRORED)
+                return ConcourseColors.STATUS_ERRORED
                 break
             case "aborted":
-                label.setBackground(ConcourseColors.STATUS_ABORTED)
+                return ConcourseColors.STATUS_ABORTED
                 break
             case "paused":
-                label.setBackground(ConcourseColors.STATUS_PAUSED)
+                return ConcourseColors.STATUS_PAUSED
                 break
             case "succeeded":
-                label.setBackground(ConcourseColors.STATUS_SUCCEEDED)
+                return ConcourseColors.STATUS_SUCCEEDED
                 break
         }
     }
@@ -102,8 +95,8 @@ class Notification {
                 .getLocalGraphicsEnvironment()
                 .getDefaultScreenDevice()
         def screenBounds = screen.getDefaultConfiguration().getBounds()
-        final int x = (int) screenBounds.getMaxX() - frame.getWidth()
-        final int y = (int) screenBounds.getMaxY() - frame.getHeight()
+        final int x = (int) screenBounds.getMaxX() - frame.getWidth() - 5
+        final int y = (int) screenBounds.getMaxY() - frame.getHeight() - 30
         [x, y]
     }
 
