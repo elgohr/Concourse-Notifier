@@ -4,7 +4,7 @@ import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
 import com.elgohr.concourse.notifier.api.Job
 import spock.lang.Specification
 
-class NotificationSchedulerImplTest extends Specification {
+class NotificationSchedulerImplSpec extends Specification {
 
     def scheduler
     def mockConcourseService

@@ -2,7 +2,7 @@ package com.elgohr.concourse.notifier
 
 import spock.lang.Specification
 
-class ConcourseNotificationTest extends Specification {
+class ConcourseNotificationSpec extends Specification {
 
     def "sets up Notifier"() {
         when:

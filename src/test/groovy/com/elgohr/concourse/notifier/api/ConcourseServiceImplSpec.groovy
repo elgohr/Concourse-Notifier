@@ -2,7 +2,7 @@ package com.elgohr.concourse.notifier.api
 
 import spock.lang.Specification
 
-class ConcourseServiceImplTest extends Specification {
+class ConcourseServiceImplSpec extends Specification {
 
     def wrapper
 

@@ -2,7 +2,7 @@ package com.elgohr.concourse.notifier.api
 
 import spock.lang.Specification
 
-class JobTest extends Specification {
+class JobSpec extends Specification {
 
     def "uses pipeline and name to generate key"() {
         when:
