@@ -97,4 +97,30 @@ class ConcourseServiceImplSpec extends Specification {
         jobs[0].status == ""
         jobs[0].pipeline == ""
     }
+
+    def "looks out for new build jobs"() {
+        given:
+        def mockConcourseResponse = '[{"id":1,"name":"fly","url":"/teams/main/pipelines/main/jobs/fly","next_build":{"id":38470,"team_name":"main","name":"671","status":"started","job_name":"fly","url":"/teams/main/pipelines/main/jobs/fly/builds/671","api_url":"/api/v1/builds/38470","pipeline_name":"main","start_time":1495238440,"end_time":1495238756},"finished_build":null,"inputs":[{"name":"concourse","resource":"concourse","trigger":true}],"outputs":[],"groups":["develop"]}]'
+        URL.class.metaClass.text = mockConcourseResponse
+        when:
+        def jobs = wrapper.getJobs()
+        then:
+        jobs[0].name == "fly"
+        jobs[0].url == "/teams/main/pipelines/main/jobs/fly"
+        jobs[0].status == "started"
+        jobs[0].pipeline == "main"
+    }
+
+    def "prefers new build jobs over finished jobs"() {
+        given:
+        def mockConcourseResponse = '[{"id":1,"name":"fly","url":"/teams/main/pipelines/main/jobs/fly","next_build":{"id":38470,"team_name":"main","name":"671","status":"started","job_name":"fly","url":"/teams/main/pipelines/main/jobs/fly/builds/671","api_url":"/api/v1/builds/38470","pipeline_name":"main","start_time":1495238440,"end_time":1495238756},"finished_build":{"id":38469,"team_name":"main","name":"670","status":"finished","job_name":"fly","url":"/teams/main/pipelines/main/jobs/fly/builds/671","api_url":"/api/v1/builds/38470","pipeline_name":"main","start_time":1495238440,"end_time":1495238756},"inputs":[{"name":"concourse","resource":"concourse","trigger":true}],"outputs":[],"groups":["develop"]}]'
+        URL.class.metaClass.text = mockConcourseResponse
+        when:
+        def jobs = wrapper.getJobs()
+        then:
+        jobs[0].name == "fly"
+        jobs[0].url == "/teams/main/pipelines/main/jobs/fly"
+        jobs[0].status == "started"
+        jobs[0].pipeline == "main"
+    }
 }

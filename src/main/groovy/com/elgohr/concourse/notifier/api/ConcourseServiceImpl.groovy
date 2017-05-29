@@ -20,13 +20,15 @@ class ConcourseServiceImpl implements ConcourseService{
         def response = jsonSlurper.parseText responseContent
         def newJobs = [] as List
         for (job in response) {
-            def pipeline = (job.finished_build != null) ? job.finished_build.pipeline_name : ""
-            def status = (job.finished_build != null) ? job.finished_build.status : ""
+            def finishedPipeline = (job.finished_build != null) ? job.finished_build.pipeline_name : ""
+            def finishedStatus = (job.finished_build != null) ? job.finished_build.status : ""
+            def nextPipeline = (job.next_build != null) ? job.next_build.pipeline_name : finishedPipeline
+            def nextStatus = (job.next_build != null) ? job.next_build.status : finishedStatus
             newJobs.add(new Job(
                     job.name,
-                    pipeline,
+                    nextPipeline,
                     job.url,
-                    status
+                    nextStatus
             ))
         }
         newJobs

@@ -4,10 +4,12 @@ import com.elgohr.concourse.notifier.ConcourseService
 import com.elgohr.concourse.notifier.NotificationFactory
 import com.elgohr.concourse.notifier.NotificationScheduler
 import com.elgohr.concourse.notifier.api.Job
+import groovy.util.logging.Slf4j
 
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+@Slf4j
 class NotificationSchedulerImpl implements NotificationScheduler {
 
     def jobBuffer = [] as HashMap<String, Job>
@@ -31,10 +33,12 @@ class NotificationSchedulerImpl implements NotificationScheduler {
         if (!initialized()) {
             for (Job job in newJobs) {
                 jobBuffer.put(job.getKey(), job)
+                log.debug "$job.pipeline - $job.name : Added with status $job.status"
             }
         } else {
             for (Job job in newJobs) {
                 if (jobHasChanged(job)) {
+                    log.info "$job.pipeline - $job.name : Changed status to $job.status"
                     notificationFactory.createNotification(job.name, job.pipeline, job.url, job.status)
                     jobBuffer.put(job.getKey(), job)
                 }
