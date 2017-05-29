@@ -1,6 +1,7 @@
 package com.elgohr.concourse.notifier.notifications
 
 import javax.swing.BorderFactory
+import javax.swing.JDialog
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -8,6 +9,7 @@ import java.awt.BorderLayout
 import java.awt.Container
 import java.awt.Dimension
 import java.awt.GraphicsEnvironment
+import java.awt.Window
 import java.awt.event.WindowEvent
 
 class Notification {
@@ -57,8 +59,11 @@ class Notification {
 
     def getMainFrame() {
         def frame = new JFrame()
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE)
-        frame.setUndecorated(true)
+        frame.setDefaultCloseOperation JFrame.HIDE_ON_CLOSE
+        frame.setUndecorated true
+        frame.setAlwaysOnTop true
+        frame.setFocusableWindowState false
+        frame.setType Window.Type.UTILITY
         frame.setPreferredSize(new Dimension(300, 75))
         frame.getContentPane().setBackground(ConcourseColors.TEXT)
         frame
@@ -99,6 +104,5 @@ class Notification {
         final int y = (int) screenBounds.getMaxY() - frame.getHeight() - 30
         [x, y]
     }
-
 
 }
