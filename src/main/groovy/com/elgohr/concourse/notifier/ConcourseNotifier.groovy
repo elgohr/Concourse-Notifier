@@ -5,6 +5,8 @@ import com.elgohr.concourse.notifier.notifications.NotificationFactoryImpl
 import com.elgohr.concourse.notifier.notifications.NotificationSchedulerImpl
 import groovy.util.logging.Slf4j
 
+import java.util.concurrent.Executors
+
 @Slf4j
 class ConcourseNotifier {
 
@@ -42,7 +44,10 @@ class ConcourseNotifier {
     ConcourseNotifier(URL url) {
         concourseService = new ConcourseServiceImpl(url)
         notificationFactory = new NotificationFactoryImpl()
-        notificationScheduler = new NotificationSchedulerImpl(concourseService, notificationFactory)
+        notificationScheduler = new NotificationSchedulerImpl(
+                concourseService,
+                notificationFactory,
+                Executors.newScheduledThreadPool(1))
         notificationScheduler.startCheck()
     }
 

@@ -6,21 +6,21 @@ import com.elgohr.concourse.notifier.NotificationScheduler
 import com.elgohr.concourse.notifier.api.Job
 import groovy.util.logging.Slf4j
 
-import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 @Slf4j
 class NotificationSchedulerImpl implements NotificationScheduler {
 
     def jobBuffer = [] as HashMap<String, Job>
-    def final concourseService
-    def final notificationFactory
-    def checker = Executors.newScheduledThreadPool(1)
+    def final concourseService, notificationFactory, checker
 
     NotificationSchedulerImpl(ConcourseService concourseService,
-                              NotificationFactory notificationFactory) {
+                              NotificationFactory notificationFactory,
+                              ScheduledExecutorService checkPool) {
         this.concourseService = concourseService
         this.notificationFactory = notificationFactory
+        this.checker = checkPool
     }
 
     def startCheck() {

@@ -4,17 +4,22 @@ import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
 import com.elgohr.concourse.notifier.api.Job
 import spock.lang.Specification
 
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+
 class NotificationSchedulerImplSpec extends Specification {
 
-    def scheduler
-    def mockConcourseService
-    def mockNotificationFactory
+    def scheduler, mockConcourseService, mockNotificationFactory, spyCheckPool
 
     void setup() {
         def arguments = [new URL("http://any")]
         mockConcourseService = Mock(ConcourseServiceImpl, constructorArgs: arguments)
         mockNotificationFactory = Mock(NotificationFactoryImpl)
-        scheduler = new NotificationSchedulerImpl(mockConcourseService, mockNotificationFactory)
+        spyCheckPool = Spy(ScheduledThreadPoolExecutor, constructorArgs: [1])
+        scheduler = new NotificationSchedulerImpl(
+                mockConcourseService,
+                mockNotificationFactory,
+                spyCheckPool)
     }
 
     void cleanup() {
@@ -72,8 +77,7 @@ class NotificationSchedulerImplSpec extends Specification {
     def "checks API every 5 seconds for updates"() {
         when:
         scheduler.startCheck()
-        sleep(5001)
         then:
-        2 * mockConcourseService.getJobs()
+        1 * spyCheckPool.scheduleAtFixedRate(_, 0, 5, TimeUnit.SECONDS)
     }
 }

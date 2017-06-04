@@ -8,30 +8,48 @@ import javax.swing.JPanel
 import java.awt.BorderLayout
 import java.awt.Container
 import java.awt.Dimension
+import java.awt.GraphicsDevice
 import java.awt.GraphicsEnvironment
+import java.awt.Insets
+import java.awt.Toolkit
 import java.awt.Window
 import java.awt.event.WindowEvent
 
 class NotificationView {
 
     def static final NOTIFICATION_TIMEOUT = 5000
-    def final pipeline, jobName, status
+    def final pipeline, jobName, status, numberOfOpenNotifications
 
-    NotificationView(String pipeline, String jobName, String status) {
+    NotificationView(String pipeline,
+                     String jobName,
+                     String status,
+                     numberOfOpenNotifications) {
         this.pipeline = pipeline
         this.jobName = jobName
         this.status = status
-        showNotification()
+        this.numberOfOpenNotifications = numberOfOpenNotifications
     }
 
-    def showNotification() {
-        def frame = getMainFrame()
-        addComponentsToFrame(frame.getContentPane())
-        showFrame(frame)
-        closeFrameAfterTimeout(frame)
+    def showNotification(Closure callback = {}) {
+        def dialog = createDialog()
+        addComponents(dialog.getContentPane())
+        showDialog(dialog)
+        closeDialogAfterTimeout(dialog, callback)
     }
 
-    def addComponentsToFrame(Container container) {
+    static def createDialog() {
+        def dialog = new JDialog()
+        dialog.setDefaultCloseOperation JFrame.HIDE_ON_CLOSE
+        dialog.setUndecorated true
+        dialog.setAlwaysOnTop true
+        dialog.setFocusableWindowState false
+        dialog.setType Window.Type.POPUP
+        dialog.setPreferredSize(new Dimension(300, 75))
+        dialog.getContentPane().setBackground(ConcourseColors.TEXT)
+        dialog
+    }
+
+    def addComponents(Container container) {
         def contentPanel = new JPanel()
         def backgroundColor = getBackgroundColorByStatus()
         def border = BorderFactory.createMatteBorder(5, 5, 5, 5, backgroundColor)
@@ -46,27 +64,27 @@ class NotificationView {
         contentPanel.add(contentLabel, BorderLayout.CENTER)
     }
 
-    def closeFrameAfterTimeout(def frame) {
-        sleep(NOTIFICATION_TIMEOUT)
-        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING))
-    }
-
-    def showFrame(def frame) {
+    def showDialog(def frame) {
         frame.pack()
-        frame.setLocation(getPosition(frame))
+        def screen = GraphicsEnvironment
+                .getLocalGraphicsEnvironment()
+                .getDefaultScreenDevice()
+        def toolkit = Toolkit.getDefaultToolkit()
+        frame.setLocation(
+                getPosition(
+                        screen,
+                        toolkit,
+                        frame,
+                        numberOfOpenNotifications)
+        )
         frame.setVisible(true)
     }
 
-    def getMainFrame() {
-        def frame = new JDialog()
-        frame.setDefaultCloseOperation JFrame.HIDE_ON_CLOSE
-        frame.setUndecorated true
-        frame.setAlwaysOnTop true
-        frame.setFocusableWindowState false
-        frame.setType Window.Type.UTILITY
-        frame.setPreferredSize(new Dimension(300, 75))
-        frame.getContentPane().setBackground(ConcourseColors.TEXT)
-        frame
+    static def closeDialogAfterTimeout(def frame, Closure callback) {
+        new Timer().runAfter(NOTIFICATION_TIMEOUT, {
+            frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING))
+            callback.run()
+        })
     }
 
     def getBackgroundColorByStatus() {
@@ -95,13 +113,17 @@ class NotificationView {
         }
     }
 
-    def getPosition(def frame) {
-        def screen = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getDefaultScreenDevice()
+    static def getPosition(GraphicsDevice screen,
+                           Toolkit toolkit,
+                           def frame,
+                           int numberOfComponents) {
         def screenBounds = screen.getDefaultConfiguration().getBounds()
+
+        Insets insets = toolkit.getScreenInsets(screen.getDefaultConfiguration())
+        int taskBarSize = insets.bottom
+
         final int x = (int) screenBounds.getMaxX() - frame.getWidth() - 5
-        final int y = (int) screenBounds.getMaxY() - frame.getHeight() - 30
+        final int y = (int) screenBounds.getMaxY() - taskBarSize - (frame.getHeight() + 5) * numberOfComponents
         [x, y]
     }
 
