@@ -46,19 +46,19 @@ class Notification {
         contentPanel.add(contentLabel, BorderLayout.CENTER)
     }
 
-    def closeFrameAfterTimeout(JFrame frame) {
+    def closeFrameAfterTimeout(def frame) {
         sleep(NOTIFICATION_TIMEOUT)
         frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING))
     }
 
-    def showFrame(JFrame frame) {
+    def showFrame(def frame) {
         frame.pack()
         frame.setLocation(getPosition(frame))
         frame.setVisible(true)
     }
 
     def getMainFrame() {
-        def frame = new JFrame()
+        def frame = new JDialog()
         frame.setDefaultCloseOperation JFrame.HIDE_ON_CLOSE
         frame.setUndecorated true
         frame.setAlwaysOnTop true
@@ -95,7 +95,7 @@ class Notification {
         }
     }
 
-    def getPosition(JFrame frame) {
+    def getPosition(def frame) {
         def screen = GraphicsEnvironment
                 .getLocalGraphicsEnvironment()
                 .getDefaultScreenDevice()
