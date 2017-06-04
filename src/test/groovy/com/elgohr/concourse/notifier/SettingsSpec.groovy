@@ -1,5 +1,6 @@
-package com.elgohr.concourse.notifier.settings
+package com.elgohr.concourse.notifier
 
+import com.elgohr.concourse.notifier.Settings
 import spock.lang.Specification
 
 class SettingsSpec extends Specification {

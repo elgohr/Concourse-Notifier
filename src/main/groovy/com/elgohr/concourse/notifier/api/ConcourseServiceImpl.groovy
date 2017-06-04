@@ -1,6 +1,7 @@
 package com.elgohr.concourse.notifier.api
 
 import com.elgohr.concourse.notifier.ConcourseService
+import com.elgohr.concourse.notifier.Settings
 import groovy.json.JsonSlurper
 
 class ConcourseServiceImpl implements ConcourseService{
@@ -10,9 +11,9 @@ class ConcourseServiceImpl implements ConcourseService{
     def final jobsEndpoint
     def final jsonSlurper
 
-    ConcourseServiceImpl(URL endpoint) {
+    ConcourseServiceImpl(Settings settings) {
         this.jsonSlurper = new JsonSlurper()
-        this.jobsEndpoint = new URL(endpoint.toString() + JOBS_URL)
+        this.jobsEndpoint = new URL(settings.url.toString() + JOBS_URL)
     }
 
     List getJobs() {

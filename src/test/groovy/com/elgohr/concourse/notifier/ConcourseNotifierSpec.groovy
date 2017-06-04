@@ -6,7 +6,12 @@ class ConcourseNotifierSpec extends Specification {
 
     def "sets up Notifier"() {
         when:
-        def notifier = new ConcourseNotifier(new URL("http://ANY"))
+        def settings = new Settings.SettingsBuilder()
+                .url(new URL("http://url"))
+                .checkTime(5)
+                .notificationDelay(5)
+                .build()
+        def notifier = new ConcourseNotifier(settings)
         then:
         notifier.notificationFactory != null
         notifier.concourseService != null
@@ -19,7 +24,7 @@ class ConcourseNotifierSpec extends Specification {
         when:
         ConcourseNotifier.main(args)
         then:
-        ConcourseNotifier.url.toString() == "http://url"
+        ConcourseNotifier.settings.getUrl().toString() == "http://url"
     }
 
     def "gets check-time from arguments"() {
@@ -28,7 +33,7 @@ class ConcourseNotifierSpec extends Specification {
         when:
         ConcourseNotifier.main(args)
         then:
-        ConcourseNotifier.checkTime == 5
+        ConcourseNotifier.settings.getCheckTime() == 5
     }
 
     def "gets notification delay from arguments"() {
@@ -37,7 +42,7 @@ class ConcourseNotifierSpec extends Specification {
         when:
         ConcourseNotifier.main(args)
         then:
-        ConcourseNotifier.notificationDelay == 5
+        ConcourseNotifier.settings.getNotificationDelay() == 5
     }
 
     def "prevents mis-usage of arguments"() {
@@ -46,9 +51,9 @@ class ConcourseNotifierSpec extends Specification {
         when:
         ConcourseNotifier.main(args)
         then:
-        ConcourseNotifier.url.toString() == "https://ci.concourse.ci"
-        ConcourseNotifier.checkTime == 5
-        ConcourseNotifier.notificationDelay == 5
+        ConcourseNotifier.settings.getUrl().toString() == "https://ci.concourse.ci"
+        ConcourseNotifier.settings.getCheckTime() == 5
+        ConcourseNotifier.settings.getNotificationDelay() == 5
     }
 
 }

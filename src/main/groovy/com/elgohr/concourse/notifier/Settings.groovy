@@ -1,4 +1,4 @@
-package com.elgohr.concourse.notifier.settings
+package com.elgohr.concourse.notifier
 
 import groovy.transform.builder.Builder
 import groovy.transform.builder.ExternalStrategy
