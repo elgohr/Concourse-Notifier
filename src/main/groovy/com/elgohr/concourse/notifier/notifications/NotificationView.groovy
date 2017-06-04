@@ -12,12 +12,12 @@ import java.awt.GraphicsEnvironment
 import java.awt.Window
 import java.awt.event.WindowEvent
 
-class Notification {
+class NotificationView {
 
     def static final NOTIFICATION_TIMEOUT = 5000
     def final pipeline, jobName, status
 
-    Notification(String pipeline, String jobName, String status) {
+    NotificationView(String pipeline, String jobName, String status) {
         this.pipeline = pipeline
         this.jobName = jobName
         this.status = status

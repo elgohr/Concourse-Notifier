@@ -2,7 +2,16 @@ package com.elgohr.concourse.notifier
 
 import spock.lang.Specification
 
-class ConcourseNotifierTest extends Specification {
+class ConcourseNotifierSpec extends Specification {
+
+    def "sets up Notifier"() {
+        when:
+        def notifier = new ConcourseNotifier(new URL("http://ANY"))
+        then:
+        notifier.notificationFactory != null
+        notifier.concourseService != null
+        notifier.notificationScheduler != null
+    }
 
     def "gets url from arguments"() {
         given:
@@ -41,4 +50,5 @@ class ConcourseNotifierTest extends Specification {
         ConcourseNotifier.checkTime == 5
         ConcourseNotifier.notificationDelay == 5
     }
+
 }

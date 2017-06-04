@@ -15,7 +15,7 @@ class NotificationFactoryImpl implements NotificationFactory {
         notificationJobs.submit({ ->
             numberOfOpenNotifications++
             log.debug "Number of open notifications $numberOfOpenNotifications"
-            new Notification(pipeline, name, status)
+            new NotificationView(pipeline, name, status)
             numberOfOpenNotifications--
         })
     }
