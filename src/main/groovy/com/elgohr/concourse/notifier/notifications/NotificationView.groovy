@@ -1,5 +1,7 @@
 package com.elgohr.concourse.notifier.notifications
 
+import com.elgohr.concourse.notifier.ConcourseNotifier
+
 import javax.swing.BorderFactory
 import javax.swing.JDialog
 import javax.swing.JFrame
@@ -17,7 +19,7 @@ import java.awt.event.WindowEvent
 
 class NotificationView {
 
-    def static final NOTIFICATION_TIMEOUT = 5000
+    def static final NOTIFICATION_TIMEOUT = ConcourseNotifier.getSettings().checkTime
     def final pipeline, jobName, status, numberOfOpenNotifications
 
     NotificationView(String pipeline,

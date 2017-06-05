@@ -4,7 +4,7 @@ import com.elgohr.concourse.notifier.ConcourseService
 import com.elgohr.concourse.notifier.Settings
 import groovy.json.JsonSlurper
 
-class ConcourseServiceImpl implements ConcourseService{
+class ConcourseServiceImpl implements ConcourseService {
 
     def static final JOBS_URL = "/api/v1/teams/main/pipelines/main/jobs"
 

@@ -1,12 +1,13 @@
 package com.elgohr.concourse.notifier
 
+import com.elgohr.concourse.notifier.settings.SettingsBuilder
 import spock.lang.Specification
 
 class ConcourseNotifierSpec extends Specification {
 
     def "sets up Notifier"() {
         when:
-        def settings = new Settings.SettingsBuilder()
+        def settings = new SettingsBuilder()
                 .url(new URL("http://url"))
                 .checkTime(5)
                 .notificationDelay(5)

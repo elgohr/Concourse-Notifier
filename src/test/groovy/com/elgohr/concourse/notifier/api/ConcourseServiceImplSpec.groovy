@@ -1,6 +1,6 @@
 package com.elgohr.concourse.notifier.api
 
-import com.elgohr.concourse.notifier.Settings
+import com.elgohr.concourse.notifier.settings.SettingsBuilder
 import spock.lang.Specification
 
 class ConcourseServiceImplSpec extends Specification {
@@ -8,7 +8,7 @@ class ConcourseServiceImplSpec extends Specification {
     def wrapper
 
     def setup() {
-        def settings = new Settings.SettingsBuilder().url(new URL("http://ci.endpoint")).build()
+        def settings = new SettingsBuilder().url(new URL("http://ci.endpoint")).build()
         wrapper = new ConcourseServiceImpl(settings)
     }
 
@@ -80,7 +80,7 @@ class ConcourseServiceImplSpec extends Specification {
 
     def "handles connection errors"() {
         given:
-        URL.class.metaClass.text = { -> throw new RuntimeException()}
+        URL.class.metaClass.text = { -> throw new RuntimeException() }
         when:
         def jobs = wrapper.getJobs()
         then:

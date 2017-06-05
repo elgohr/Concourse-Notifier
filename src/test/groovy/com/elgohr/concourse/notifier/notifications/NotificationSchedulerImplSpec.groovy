@@ -2,7 +2,7 @@ package com.elgohr.concourse.notifier.notifications
 
 import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
 import com.elgohr.concourse.notifier.api.Job
-import com.elgohr.concourse.notifier.Settings
+import com.elgohr.concourse.notifier.settings.SettingsBuilder
 import spock.lang.Specification
 
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -13,7 +13,7 @@ class NotificationSchedulerImplSpec extends Specification {
     def scheduler, mockConcourseService, mockNotificationFactory, spyCheckPool
 
     void setup() {
-        def arguments = [new Settings.SettingsBuilder().url(new URL("http://any")).build()]
+        def arguments = [new SettingsBuilder().url(new URL("http://any")).build()]
         mockConcourseService = Mock(ConcourseServiceImpl, constructorArgs: arguments)
         mockNotificationFactory = Mock(NotificationFactoryImpl)
         spyCheckPool = Spy(ScheduledThreadPoolExecutor, constructorArgs: [1])

@@ -3,6 +3,7 @@ package com.elgohr.concourse.notifier
 import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
 import com.elgohr.concourse.notifier.notifications.NotificationFactoryImpl
 import com.elgohr.concourse.notifier.notifications.NotificationSchedulerImpl
+import com.elgohr.concourse.notifier.settings.SettingsBuilder
 import groovy.util.logging.Slf4j
 
 import java.util.concurrent.Executors
@@ -14,34 +15,61 @@ class ConcourseNotifier {
     def final notificationScheduler, notificationFactory, concourseService
 
     static void main(String[] args) {
-        def settingsBuilder = new Settings.SettingsBuilder()
-        settingsBuilder.url new URL("https://ci.concourse.ci")
-        settingsBuilder.checkTime 5
-        settingsBuilder.notificationDelay 5
+        def (
+        URL argUrl,
+        Integer argCheckTime,
+        Integer argNotificationDelay) = checkArguments(args)
+        settings = initializeSettings(argUrl, argCheckTime, argNotificationDelay)
+        new ConcourseNotifier(settings)
+    }
 
+    private static Settings initializeSettings(URL url,
+                                               Integer checkTime,
+                                               Integer notificationDelay) {
+        def settingsBuilder = new SettingsBuilder()
+        if (url != null) {
+            settingsBuilder.url url
+        } else {
+            settingsBuilder.url new URL("https://ci.concourse.ci")
+        }
+        if (checkTime != null) {
+            settingsBuilder.checkTime checkTime
+        } else {
+            settingsBuilder.checkTime 5
+        }
+        if (notificationDelay != null) {
+            settingsBuilder.notificationDelay notificationDelay
+        } else {
+            settingsBuilder.notificationDelay 5
+        }
+        settings = settingsBuilder.build()
+        settings
+    }
+
+    private static List checkArguments(String[] args) {
+        def argUrl = null, argCheckTime = null, argNotificationDelay = null
         for (int i = 0; i < args.size(); i++) {
             if (args[i] == "-c") {
                 try {
-                    settingsBuilder.url new URL(args[i + 1])
+                    argUrl = new URL(args[i + 1])
                 } catch (Exception e) {
                     log.error "URL must be an URL. Using the default (https://ci.concourse.ci)"
                 }
             } else if (args[i] == "-t") {
                 try {
-                    settingsBuilder.checkTime Integer.parseInt(args[i + 1])
+                    argCheckTime = Integer.parseInt(args[i + 1])
                 } catch (Exception e) {
                     log.error "Checktime must be given as an Integer. Using the default (5 seconds)"
                 }
             } else if (args[i] == "-d") {
                 try {
-                    settingsBuilder.notificationDelay Integer.parseInt(args[i + 1])
+                    argNotificationDelay = Integer.parseInt(args[i + 1])
                 } catch (Exception e) {
                     log.error "Notification delay must be given as an Integer. Using the default (5 seconds)"
                 }
             }
         }
-        settings = settingsBuilder.build()
-        new ConcourseNotifier(settings)
+        [argUrl, argCheckTime, argNotificationDelay]
     }
 
     ConcourseNotifier(Settings settings) {
@@ -54,4 +82,7 @@ class ConcourseNotifier {
         notificationScheduler.startCheck()
     }
 
+    static getSettings() {
+        return settings
+    }
 }
