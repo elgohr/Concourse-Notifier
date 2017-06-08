@@ -4,6 +4,7 @@ import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
 import com.elgohr.concourse.notifier.notifications.NotificationFactoryImpl
 import com.elgohr.concourse.notifier.notifications.NotificationSchedulerImpl
 import com.elgohr.concourse.notifier.settings.SettingsView
+import com.elgohr.concourse.notifier.tray.SystemTrayMenu
 import groovy.util.logging.Slf4j
 
 import java.util.concurrent.Executors
@@ -14,6 +15,7 @@ class ConcourseNotifier {
     def final notificationScheduler,
               notificationFactory,
               concourseService,
+              trayMenu,
               settings
 
     static void main(String[] args) {
@@ -27,6 +29,8 @@ class ConcourseNotifier {
         if (hasNoArguments(args)) {
             settingsView.showSettings()
         }
+        trayMenu = new SystemTrayMenu()
+        trayMenu.showMenu()
         concourseService = new ConcourseServiceImpl(settings)
         notificationFactory = new NotificationFactoryImpl(settings)
         notificationScheduler = new NotificationSchedulerImpl(

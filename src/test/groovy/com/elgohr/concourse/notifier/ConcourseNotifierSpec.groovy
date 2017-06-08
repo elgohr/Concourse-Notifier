@@ -17,6 +17,7 @@ class ConcourseNotifierSpec extends Specification {
         notifier.notificationFactory != null
         notifier.concourseService != null
         notifier.notificationScheduler != null
+        notifier.trayMenu != null
         notifier.getSettings().getUrl().toString() == "http://url"
         notifier.getSettings().getCheckTimeInSecs() == 5
         notifier.getSettings().getNotificationTimeoutInSecs() == 6
