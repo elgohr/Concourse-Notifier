@@ -1,6 +1,6 @@
 package com.elgohr.concourse.notifier.api
 
-import com.elgohr.concourse.notifier.settings.SettingsBuilder
+import com.elgohr.concourse.notifier.Settings
 import spock.lang.Specification
 
 class ConcourseServiceImplSpec extends Specification {
@@ -8,8 +8,7 @@ class ConcourseServiceImplSpec extends Specification {
     def wrapper
 
     def setup() {
-        def settings = new SettingsBuilder().url(new URL("http://ci.endpoint")).build()
-        wrapper = new ConcourseServiceImpl(settings)
+        wrapper = new ConcourseServiceImpl(new Settings())
     }
 
     def "unwraps jobs from concourse response"() {

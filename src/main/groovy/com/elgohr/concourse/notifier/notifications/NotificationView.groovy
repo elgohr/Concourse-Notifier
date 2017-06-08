@@ -1,35 +1,36 @@
 package com.elgohr.concourse.notifier.notifications
 
-import com.elgohr.concourse.notifier.ConcourseNotifier
+import com.elgohr.concourse.notifier.ViewUtil
 
 import javax.swing.BorderFactory
 import javax.swing.JDialog
-import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import java.awt.BorderLayout
 import java.awt.Container
 import java.awt.Dimension
-import java.awt.GraphicsDevice
+import java.awt.Font
 import java.awt.GraphicsEnvironment
-import java.awt.Insets
 import java.awt.Toolkit
 import java.awt.Window
 import java.awt.event.WindowEvent
 
 class NotificationView {
 
-    def static final NOTIFICATION_TIMEOUT = ConcourseNotifier.getSettings().checkTime
-    def final pipeline, jobName, status, numberOfOpenNotifications
+    def final pipeline, jobName,
+              status, numberOfOpenNotifications,
+              timeoutInMillis
 
     NotificationView(String pipeline,
                      String jobName,
                      String status,
-                     numberOfOpenNotifications) {
+                     int numberOfOpenNotifications,
+                     int timeoutInMillis) {
         this.pipeline = pipeline
         this.jobName = jobName
         this.status = status
         this.numberOfOpenNotifications = numberOfOpenNotifications
+        this.timeoutInMillis = timeoutInMillis
     }
 
     def showNotification(Closure callback = {}) {
@@ -41,7 +42,6 @@ class NotificationView {
 
     static def createDialog() {
         def dialog = new JDialog()
-        dialog.setDefaultCloseOperation JFrame.HIDE_ON_CLOSE
         dialog.setUndecorated true
         dialog.setAlwaysOnTop true
         dialog.setFocusableWindowState false
@@ -53,17 +53,18 @@ class NotificationView {
 
     def addComponents(Container container) {
         def contentPanel = new JPanel()
-        def backgroundColor = getBackgroundColorByStatus()
+        def backgroundColor = ViewUtil.getColorByStatus(status)
         def border = BorderFactory.createMatteBorder(5, 5, 5, 5, backgroundColor)
-        contentPanel.setBorder(border)
-        contentPanel.setBackground(ConcourseColors.BACKGROUND)
-        contentPanel.setLayout(new BorderLayout())
-        container.add(contentPanel)
+        contentPanel.setBorder border
+        contentPanel.setBackground ConcourseColors.BACKGROUND
+        contentPanel.setLayout new BorderLayout()
+        container.add contentPanel
 
         def contentLabel = new JLabel("$pipeline - $jobName")
-        contentLabel.setForeground(ConcourseColors.TEXT)
-        contentLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5))
-        contentPanel.add(contentLabel, BorderLayout.CENTER)
+        contentLabel.setForeground ConcourseColors.TEXT
+        contentLabel.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
+        contentLabel.setBorder BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        contentPanel.add contentLabel, BorderLayout.CENTER
     }
 
     def showDialog(def frame) {
@@ -73,7 +74,7 @@ class NotificationView {
                 .getDefaultScreenDevice()
         def toolkit = Toolkit.getDefaultToolkit()
         frame.setLocation(
-                getPosition(
+                ViewUtil.getPosition(
                         screen,
                         toolkit,
                         frame,
@@ -82,51 +83,11 @@ class NotificationView {
         frame.setVisible(true)
     }
 
-    static def closeDialogAfterTimeout(def frame, Closure callback) {
-        new Timer().runAfter(NOTIFICATION_TIMEOUT, {
+    def closeDialogAfterTimeout(def frame, Closure callback) {
+        new Timer().runAfter(timeoutInMillis, {
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING))
             callback.run()
         })
-    }
-
-    def getBackgroundColorByStatus() {
-        switch (status) {
-            case "pending":
-                return ConcourseColors.STATUS_PENDING
-                break
-            case "started":
-                return ConcourseColors.STATUS_STARTED
-                break
-            case "failed":
-                return ConcourseColors.STATUS_FAILED
-                break
-            case "errored":
-                return ConcourseColors.STATUS_ERRORED
-                break
-            case "aborted":
-                return ConcourseColors.STATUS_ABORTED
-                break
-            case "paused":
-                return ConcourseColors.STATUS_PAUSED
-                break
-            case "succeeded":
-                return ConcourseColors.STATUS_SUCCEEDED
-                break
-        }
-    }
-
-    static def getPosition(GraphicsDevice screen,
-                           Toolkit toolkit,
-                           def frame,
-                           int numberOfComponents) {
-        def screenBounds = screen.getDefaultConfiguration().getBounds()
-
-        Insets insets = toolkit.getScreenInsets(screen.getDefaultConfiguration())
-        int taskBarSize = insets.bottom
-
-        final int x = (int) screenBounds.getMaxX() - frame.getWidth() - 5
-        final int y = (int) screenBounds.getMaxY() - taskBarSize - (frame.getHeight() + 5) * numberOfComponents
-        [x, y]
     }
 
 }

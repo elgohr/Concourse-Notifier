@@ -11,51 +11,31 @@ import java.awt.Toolkit
 
 class NotificationViewSpec extends Specification {
 
-    def "creates Notification"() {
-
-        given:
-        new NotificationView("PIPELINE", "JOB_NAME", "succeeded", 1)
-                .showNotification()
-        new NotificationView("PIPELINE", "JOB_NAME", "succeeded", 2)
-                .showNotification()
-        sleep(6000)
-    }
-
-    def "shows multiple notifications without overlapping"() {
-        given:
-        def rectangle = Mock(Rectangle)
-        def configuration = Mock(GraphicsConfiguration)
-        configuration.getBounds() >> rectangle
-        def screen = Mock(GraphicsDevice)
-        screen.getDefaultConfiguration() >> configuration
-
-        def toolkit = Mock(Toolkit)
-        def component = Mock(JDialog)
-
-        def screenWidth = 1024
-        def screenHeight = 768
-
-        def componentWidth = 1
-        def marginRight = 5
-
-        def componentHeight = 10
-        def taskbarHeight = 75
-        toolkit.getScreenInsets(_) >> new Insets(0, 0, taskbarHeight, 0)
-
-        def marginBottom = 5
-        def numberOfComponents = 3
-
+    def "creates multiple notifications for visual check"() {
         when:
-        def position = NotificationView.getPosition(screen, toolkit, component, numberOfComponents)
-
+        new NotificationView("PIPELINE", "JOB_NAME", "succeeded", 1, 1000)
+                .showNotification()
+        new NotificationView("PIPELINE", "JOB_NAME", "succeeded", 2, 1000)
+                .showNotification()
         then:
-        1 * rectangle.getMaxY() >> screenHeight
-        1 * rectangle.getMaxX() >> screenWidth
-        1 * component.getWidth() >> componentWidth
-        1 * component.getHeight() >> componentHeight
-        def width = screenWidth - (componentWidth + marginRight)
-        def height = screenHeight - taskbarHeight - (componentHeight + marginBottom) * numberOfComponents
-        position == [width, height]
+        sleep 2000
     }
+
+    def "calls callbacks"() {
+        given:
+        def calledFirst = false
+        def calledSecond = false
+        when:
+        new NotificationView("PIPELINE", "JOB_NAME", "succeeded", 1, 1)
+                .showNotification({calledFirst = true})
+        new NotificationView("PIPELINE", "JOB_NAME", "succeeded", 2, 1)
+                .showNotification({calledSecond = true})
+        sleep 100
+        then:
+        calledFirst
+        calledSecond
+    }
+
+
 
 }

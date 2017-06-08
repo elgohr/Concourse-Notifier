@@ -2,7 +2,7 @@ package com.elgohr.concourse.notifier
 
 class Settings {
 
-    URL url
-    int checkTime, notificationDelay
+    URL url = new URL("https://ci.concourse.ci")
+    int checkTimeInSecs = 5, notificationTimeoutInSecs = 5
 
 }
