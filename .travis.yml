@@ -1,5 +1,9 @@
 language: groovy
+before_install:
+- "export DISPLAY=:99.0"
+- "sh -e /etc/init.d/xvfb start"
 jdk:
+- openjdk8
 - oraclejdk8
 after_success:
 - bash <(curl -s https://codecov.io/bash)
