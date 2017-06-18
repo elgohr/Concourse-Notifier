@@ -5,7 +5,6 @@ import spock.lang.Specification
 
 import java.awt.event.ActionEvent
 
-
 class SystemTrayMenuSpec extends Specification {
 
     def "creates menu for visual check"() {

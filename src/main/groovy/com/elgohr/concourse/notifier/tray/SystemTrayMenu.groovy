@@ -22,7 +22,6 @@ class SystemTrayMenu {
 
         def imageResource = getClass().getResource("/tray_icon.png")
         def image = Toolkit.getDefaultToolkit().getImage(imageResource)
-        def tray = SystemTray.getSystemTray()
         def trayIcon = new TrayIcon(image)
         trayIcon.setImageAutoSize true
 
@@ -36,10 +35,16 @@ class SystemTrayMenu {
         popupMenu.add exitItem
         trayIcon.setPopupMenu(popupMenu)
         try {
-            tray.add(trayIcon)
+            if (SystemTray.isSupported()) {
+                def tray = SystemTray.getSystemTray()
+                tray.add(trayIcon)
+            } else {
+                log.info "No support for tray icons on this system."
+            }
         } catch (Exception e) {
             log.error "TrayIcon could not be added."
         }
+
     }
 
     def getPopupMenu() {
