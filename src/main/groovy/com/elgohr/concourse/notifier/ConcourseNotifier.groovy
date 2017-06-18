@@ -18,7 +18,7 @@ class ConcourseNotifier {
               trayMenu,
               settings
 
-    static void main(String[] args) {
+    static void main(String... args) {
         def settings = new Settings()
         new ConcourseNotifier(args, settings, new SettingsView(settings))
     }
