@@ -3,6 +3,8 @@ package com.elgohr.concourse.notifier.tray
 import org.codehaus.groovy.tools.shell.util.NoExitSecurityManager
 import spock.lang.Specification
 
+import java.awt.SystemTray
+import java.awt.TrayIcon
 import java.awt.event.ActionEvent
 
 class SystemTrayMenuSpec extends Specification {
@@ -34,5 +36,17 @@ class SystemTrayMenuSpec extends Specification {
 
         cleanup:
         System.setSecurityManager previousSecurityManager
+    }
+
+    def "is okay with systems which do not have a system tray"() {
+        given:
+        SystemTray.class.metaClass.static.getSystemTray = {
+            throw new UnsupportedOperationException()
+        }
+        def trayMenu = new SystemTrayMenu()
+        when:
+        trayMenu.showMenu()
+        then:
+        trayMenu.getPopupMenu() != null
     }
 }

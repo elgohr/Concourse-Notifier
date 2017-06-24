@@ -14,7 +14,11 @@ import java.awt.event.ActionListener
 @Slf4j
 class SystemTrayMenu {
 
-    def popupMenu
+    def popupMenu, systemTray
+
+    SystemTrayMenu() {
+        systemTray = SystemTray
+    }
 
     def showMenu() {
         popupMenu = new PopupMenu()
@@ -22,8 +26,6 @@ class SystemTrayMenu {
 
         def imageResource = getClass().getResource("/tray_icon.png")
         def image = Toolkit.getDefaultToolkit().getImage(imageResource)
-        def trayIcon = new TrayIcon(image)
-        trayIcon.setImageAutoSize true
 
         def exitItem = new MenuItem("exit")
         exitItem.addActionListener(new ActionListener() {
@@ -33,10 +35,14 @@ class SystemTrayMenu {
             }
         })
         popupMenu.add exitItem
-        trayIcon.setPopupMenu(popupMenu)
+
         try {
-            if (SystemTray.isSupported()) {
-                def tray = SystemTray.getSystemTray()
+            if (systemTray.isSupported()) {
+                def trayIcon = new TrayIcon(image)
+                trayIcon.setImageAutoSize true
+                trayIcon.setPopupMenu(popupMenu)
+
+                def tray = systemTray.getSystemTray()
                 tray.add(trayIcon)
             } else {
                 log.info "No support for tray icons on this system."
@@ -44,7 +50,6 @@ class SystemTrayMenu {
         } catch (Exception e) {
             log.error "TrayIcon could not be added."
         }
-
     }
 
     def getPopupMenu() {
