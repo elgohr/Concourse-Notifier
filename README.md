@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/elgohr/Concourse-Notifier.svg?branch=master)](https://travis-ci.org/elgohr/Concourse-Notifier)
+[![codecov.io](https://codecov.io/gh/elgohr/Concourse-Notifier/coverage.svg?branch=master)](https://codecov.io/gh/elgohr/Concourse-Notifier?branch=master)
 
 # Concourse Notifier
 Concourse Notifier is a little tool, which shows notifications in case of events in your [Concourse](https://concourse.ci/) pipeline written in [Groovy](http://groovy-lang.org/).  
