@@ -13,4 +13,5 @@ deploy:
   skip_cleanup: true
   file: "build/libs/ConcourseNotifier-*.jar"
   on:
+    repo: elgohr/Concourse-Notifier
     tags: true
