@@ -1,8 +1,20 @@
 language: groovy
 before_install:
-- "export DISPLAY=:99.0"
-- "sh -e /etc/init.d/xvfb start"
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
 jdk:
 - oraclejdk8
 after_success:
 - bash <(curl -s https://codecov.io/bash)
+before_deploy:
+  - export RELEASE_FILE=$(ls *.jar)
+  - echo "deploying $RELEASE_FILE to GitHub releases"
+deploy:
+  provider: releases
+  api_key:
+    secure: TugAkEUeFru1CEWV/VlWVr2weX56XitRvSlR7/sC6lheM4KcT8NKG7379GpoZlRZXDmxAsvYd5/Sqemt52V28Mj0zlcol2DShV31lBHuFLtNPGgacK0XICZmpskVyV1IkgKAHrOGtNqMlCEKsrHUlGJ8GLTSV43zYu2UjZUAvfDciS06uQVtpqIwWDgD1VwFPuSm8n+BG39R2OVOYtGcQBaEoYh1R1nDdIvwEaZAfzbLZAS8+cn+E8xAQjYHBt3axSRga+y7HolU5s6YlzwkDslWCASH15TwXLGfY5JhyrQ8uU7nIb6pdeijuel7QmeXS1XBPc/UJiTwFPD9aee1bzXZShuz7Ty+z3grQ4GeDKAbJf++qdrhSjfaR7UWP4ozIa/pLrk4RtZ8gyAQvhWM1mK3jmcksHvhBVLAPZagaj32Pr8OadRk0qgP/LpFxOCQe6O0cArg/0jRKndacLvuiZKBJKiqxjf3qv66uxJ6VGvnfhHn63ijytz/xzVrrnZvn5pmbqblOXHRw18ZNcSLuH8tgyh9o3LLZqbcDi1b7+9ojdvx/yAtpyUBFQazbQ0MIdW6VrIWEwEmtk6M+/lhmewtcZKnxxv1cQUnQLXxkBzt8d3uM/h/SfcGCTXk9CF3l/gnESH9oNhBMH0gxDEqD+jKoXyet97sjibCCYSHCsk=
+  file_glob: true
+  skip_cleanup: true
+  file: "${RELEASE_FILE}"
+  on:
+    repo: elgohr/Concourse-Notifier
