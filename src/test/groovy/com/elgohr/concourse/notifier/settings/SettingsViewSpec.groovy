@@ -38,7 +38,7 @@ class SettingsViewSpec extends Specification {
         then:
         def content = settingsView.getDialog().getContentPane().getComponents()[1]
         content.getComponents()[0].getText() == "url"
-        content.getComponents()[1].getValue().toString() == "https://ci.concourse.ci"
+        content.getComponents()[1].getText().toString() == "https://ci.concourse.ci"
         content.getComponents()[3].getText() == "interval"
         content.getComponents()[4].getText().toString() == "5"
         content.getComponents()[6].getText() == "timeout"
@@ -69,6 +69,6 @@ class SettingsViewSpec extends Specification {
         1 * settings.setUrl(new URL("https://ci.concourse.ci"))
         1 * settings.setCheckTimeInSecs(5)
         1 * settings.setNotificationTimeoutInSecs(5)
-        settingsView.getDialog().isShowing() == false
+        !settingsView.getDialog().isShowing()
     }
 }

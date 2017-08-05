@@ -8,10 +8,10 @@ import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JButton
-import javax.swing.JFormattedTextField
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JTextField
 import javax.swing.SwingConstants
 import javax.swing.WindowConstants
 import java.awt.BorderLayout
@@ -24,11 +24,13 @@ import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.WindowEvent
 
+import static java.util.Map.Entry
+
 class SettingsView {
 
     private Settings settings
     private JFrame dialog
-    private HashMap<String, JFormattedTextField> fields = [] as HashMap
+    private HashMap<String, JTextField> fields = [] as HashMap
 
     SettingsView(Settings settings) {
         this.settings = settings
@@ -45,7 +47,7 @@ class SettingsView {
         addContent(container)
     }
 
-    static def showDialog(def frame) {
+    static def showDialog(JFrame frame) {
         frame.pack()
         def screen = GraphicsEnvironment
                 .getLocalGraphicsEnvironment()
@@ -58,7 +60,7 @@ class SettingsView {
                         frame,
                         1)
         )
-        frame.setVisible(true)
+        frame.setVisible true
     }
 
     def getDialog() {
@@ -92,51 +94,83 @@ class SettingsView {
     private void addContent(Container container) {
         def content = new JPanel()
         content.setBackground ConcourseColors.TITLEBAR_BACKGROUND
-        content.setLayout new BoxLayout(content, BoxLayout.PAGE_AXIS)
+        content.setLayout new BoxLayout(content, BoxLayout.Y_AXIS)
         content.setBorder BorderFactory.createEmptyBorder(10, 20, 20, 20)
         container.add content, BorderLayout.CENTER
 
-        def options = ["url"     : settings.getUrl(),
-                       "interval": settings.getCheckTimeInSecs(),
-                       "timeout" : settings.getNotificationTimeoutInSecs()]
+        def basicOptions = ["url": settings.getUrl()]
+        addOptions(content, basicOptions)
 
-        for (def option in options) {
-            def labelField = new JLabel(option.getKey())
-            labelField.setForeground ConcourseColors.TEXT
-            labelField.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
-            content.add labelField
+        def advancedOptions = ["interval": settings.getCheckTimeInSecs(),
+                               "timeout" : settings.getNotificationTimeoutInSecs()]
+        addOptions(content, advancedOptions)
 
-            def textField = new JFormattedTextField(option.getValue())
-            textField.setForeground ConcourseColors.TEXT
-            textField.setBackground ConcourseColors.BACKGROUND
-            textField.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
-            textField.setBorder BorderFactory.createEmptyBorder()
-            labelField.setLabelFor textField
-            fields.put(option.getKey(), textField)
+        addSaveButton(content)
+    }
 
-            content.add textField
-            content.add Box.createRigidArea(new Dimension(0, 10))
-        }
-
+    private void addSaveButton(JPanel content) {
         def saveButton = new JButton("save")
         saveButton.setBorder BorderFactory.createEmptyBorder(5, 5, 5, 5)
         saveButton.setForeground ConcourseColors.TEXT
         saveButton.setBackground ConcourseColors.BACKGROUND
         saveButton.addActionListener(new ActionListener() {
             void actionPerformed(ActionEvent e) {
-                for (def button in fields) {
-                    if (button.key == "url") {
-                        settings.setUrl new URL(button.value.value.toString())
-                    } else if (button.key == "interval") {
-                        settings.setCheckTimeInSecs button.value.value
-                    } else if (button.key == "timeout") {
-                        settings.setNotificationTimeoutInSecs button.value.value
-                    }
-                }
+                saveSettings()
                 dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING))
             }
         })
         content.add saveButton
+    }
+
+    private void saveSettings() {
+        for (def field in fields) {
+            if (field.key == "url") {
+                settings.setUrl new URL(field.value.getText())
+            } else if (field.key == "interval") {
+                settings.setCheckTimeInSecs Integer.parseInt(field.value.getText())
+            } else if (field.key == "timeout") {
+                settings.setNotificationTimeoutInSecs Integer.parseInt(field.value.getText())
+            }
+        }
+    }
+
+    private void addOptions(JPanel content, Map<String, Serializable> options) {
+        for (def option in options) {
+            def textField = createContentField(option)
+            def labelField = createLabelField(option, textField)
+            addOption(content, labelField, textField)
+        }
+    }
+
+    private static void addOption(JPanel content,
+                                  JLabel labelField,
+                                  JTextField textField) {
+        content.add labelField
+        content.add textField
+        content.add Box.createRigidArea(new Dimension(0, 10))
+    }
+
+    private JTextField createContentField(Entry<String, Serializable> option) {
+        def textField = new JTextField(option.getValue().toString())
+        textField.setForeground ConcourseColors.TEXT
+        textField.setBackground ConcourseColors.BACKGROUND
+        textField.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
+        textField.setBorder BorderFactory.createEmptyBorder()
+        rememberTextFieldForSaving(option, textField)
+        textField
+    }
+
+    private JTextField rememberTextFieldForSaving(Entry<String, Serializable> option, JTextField textField) {
+        fields.put(option.getKey(), textField)
+    }
+
+    private static JLabel createLabelField(Entry<String, Serializable> option,
+                                           JTextField textField) {
+        def labelField = new JLabel(option.getKey(), SwingConstants.LEFT)
+        labelField.setForeground ConcourseColors.TEXT
+        labelField.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
+        labelField.setLabelFor textField
+        labelField
     }
 
 }
