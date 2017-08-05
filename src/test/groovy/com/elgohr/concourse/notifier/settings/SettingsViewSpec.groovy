@@ -4,6 +4,9 @@ import com.elgohr.concourse.notifier.Settings
 import spock.lang.Specification
 
 import javax.swing.JButton
+import javax.swing.JLabel
+import javax.swing.JTextField
+import java.awt.Component
 
 class SettingsViewSpec extends Specification {
 
@@ -29,7 +32,7 @@ class SettingsViewSpec extends Specification {
         settingsHeaderLabel.getText() == "settings"
     }
 
-    def "shows values of settings"() {
+    def "shows url in settings"() {
         given:
         def settings = new Settings()
         def settingsView = new SettingsView(settings)
@@ -37,12 +40,8 @@ class SettingsViewSpec extends Specification {
         settingsView.showSettings()
         then:
         def content = settingsView.getDialog().getContentPane().getComponents()[1]
-        content.getComponents()[0].getText() == "url"
-        content.getComponents()[1].getText().toString() == "https://ci.concourse.ci"
-        content.getComponents()[3].getText() == "interval"
-        content.getComponents()[4].getText().toString() == "5"
-        content.getComponents()[6].getText() == "timeout"
-        content.getComponents()[7].getText().toString() == "5"
+        findComponentByText(content.getComponents(), "url") != null
+        findComponentByText(content.getComponents(), "https://ci.concourse.ci") != null
     }
 
     def "shows save button"() {
@@ -53,7 +52,7 @@ class SettingsViewSpec extends Specification {
         settingsView.showSettings()
         then:
         def content = settingsView.getDialog().getContentPane().getComponents()[1]
-        content.getComponents()[9].getText().toString() == "save"
+        findComponentByText(content.getComponents(), "save") != null
     }
 
     def "saves settings and hides window with button click"() {
@@ -63,12 +62,22 @@ class SettingsViewSpec extends Specification {
         settingsView.showSettings()
         when:
         def content = settingsView.getDialog().getContentPane().getComponents()[1]
-        JButton saveButton = content.getComponents()[9]
+        JButton saveButton = findComponentByText(content.getComponents(), "save")
         saveButton.doClick()
         then:
         1 * settings.setUrl(new URL("https://ci.concourse.ci"))
-        1 * settings.setCheckTimeInSecs(5)
-        1 * settings.setNotificationTimeoutInSecs(5)
         !settingsView.getDialog().isShowing()
+    }
+
+    private Component findComponentByText(Component[] components, String text) {
+        for (def component in components) {
+            if ((component instanceof JTextField
+                    || component instanceof JButton
+                    || component instanceof JLabel)
+                    && component.getText() == text) {
+                return component
+            }
+        }
+        return null
     }
 }

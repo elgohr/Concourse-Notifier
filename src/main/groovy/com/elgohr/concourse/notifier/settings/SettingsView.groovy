@@ -73,7 +73,7 @@ class SettingsView {
         dialog.setUndecorated true
         dialog.setAlwaysOnTop true
         dialog.setFocusableWindowState true
-        dialog.setPreferredSize new Dimension(300, 200)
+        dialog.setPreferredSize new Dimension(300, 120)
         dialog.getContentPane().setBackground ConcourseColors.TITLEBAR_BACKGROUND
         dialog
     }
@@ -101,10 +101,6 @@ class SettingsView {
         def basicOptions = ["url": settings.getUrl()]
         addOptions(content, basicOptions)
 
-        def advancedOptions = ["interval": settings.getCheckTimeInSecs(),
-                               "timeout" : settings.getNotificationTimeoutInSecs()]
-        addOptions(content, advancedOptions)
-
         addSaveButton(content)
     }
 
@@ -126,10 +122,6 @@ class SettingsView {
         for (def field in fields) {
             if (field.key == "url") {
                 settings.setUrl new URL(field.value.getText())
-            } else if (field.key == "interval") {
-                settings.setCheckTimeInSecs Integer.parseInt(field.value.getText())
-            } else if (field.key == "timeout") {
-                settings.setNotificationTimeoutInSecs Integer.parseInt(field.value.getText())
             }
         }
     }
