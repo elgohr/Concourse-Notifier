@@ -3,6 +3,7 @@ package com.elgohr.concourse.notifier.tray
 import org.codehaus.groovy.tools.shell.util.NoExitSecurityManager
 import spock.lang.Specification
 
+import java.awt.Desktop
 import java.awt.SystemTray
 import java.awt.TrayIcon
 import java.awt.event.ActionEvent
@@ -19,13 +20,16 @@ class SystemTrayMenuSpec extends Specification {
         true
     }
 
-    def "contains exit button"() {
+    def "contains exit button when systemtray is supported"() {
         given:
+        def systemTraySpy = GroovySpy(SystemTray, global:true)
+
         def previousSecurityManager = System.getSecurityManager()
         def noExitSecurityManager = new NoExitSecurityManager()
         System.setSecurityManager noExitSecurityManager
 
         def systemTray = new SystemTrayMenu()
+        systemTray.systemTray = systemTraySpy
 
         when:
         systemTray.showMenu()
@@ -36,19 +40,24 @@ class SystemTrayMenuSpec extends Specification {
         exitButton.getLabel() == "exit"
         thrown SecurityException
 
+        1 * systemTraySpy.isSupported() >> true
+
         cleanup:
         System.setSecurityManager previousSecurityManager
     }
 
-    def "is okay with systems which do not have a system tray"() {
+    def "contains no pop up menu when systemtray is not supported"() {
         given:
-        SystemTray.class.metaClass.static.getSystemTray = {
-            throw new UnsupportedOperationException()
-        }
-        def trayMenu = new SystemTrayMenu()
+        def systemTraySpy = GroovySpy(SystemTray, global:true)
+        def systemTray = new SystemTrayMenu()
+        systemTray.systemTray = systemTraySpy
+
         when:
-        trayMenu.showMenu()
+        systemTray.showMenu()
+
         then:
-        trayMenu.getPopupMenu() != null
+        systemTray.getPopupMenu() == null
+        1 * systemTraySpy.isSupported() >> false
     }
+
 }

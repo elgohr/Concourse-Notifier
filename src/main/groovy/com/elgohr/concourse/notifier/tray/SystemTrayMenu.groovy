@@ -16,9 +16,12 @@ class SystemTrayMenu {
 
     def popupMenu, systemTray, trayIcon
 
+    SystemTrayMenu() {
+        this.systemTray = SystemTray
+    }
+
     def showMenu() {
         try {
-            systemTray = SystemTray
             if (systemTray.isSupported()) {
                 def popUpMenu = loadPopUpMenu()
                 loadTrayIcon(popUpMenu)
