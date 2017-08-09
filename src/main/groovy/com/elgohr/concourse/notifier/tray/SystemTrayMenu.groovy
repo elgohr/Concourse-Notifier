@@ -16,12 +16,9 @@ class SystemTrayMenu {
 
     def popupMenu, systemTray, trayIcon
 
-    SystemTrayMenu() {
-        systemTray = SystemTray
-    }
-
     def showMenu() {
         try {
+            systemTray = SystemTray
             if (systemTray.isSupported()) {
                 def popUpMenu = loadPopUpMenu()
                 loadTrayIcon(popUpMenu)
@@ -29,7 +26,7 @@ class SystemTrayMenu {
             } else {
                 log.info "No support for tray icons on this system."
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             log.error "TrayIcon could not be added."
         }
     }
