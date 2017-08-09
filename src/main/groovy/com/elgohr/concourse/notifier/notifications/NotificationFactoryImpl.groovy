@@ -25,8 +25,13 @@ class NotificationFactoryImpl implements NotificationFactory {
             numberOfOpenNotifications++
             log.debug "Number of open notifications $numberOfOpenNotifications"
             int timeoutInMillis = settings.notificationTimeoutInSecs * 1000
-            new NotificationView(pipeline, name, status, numberOfOpenNotifications, timeoutInMillis)
-                    .showNotification { numberOfOpenNotifications-- }
+            new NotificationView(
+                    pipeline,
+                    name,
+                    url,
+                    status,
+                    numberOfOpenNotifications,
+                    timeoutInMillis).showNotification { numberOfOpenNotifications-- }
         })
     }
 }

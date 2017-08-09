@@ -10,8 +10,10 @@ import java.awt.event.ActionEvent
 class SystemTrayMenuSpec extends Specification {
 
     def "creates menu for visual check"() {
+        given:
+        def systemTrayMenu = new SystemTrayMenu()
         when:
-        new SystemTrayMenu().showMenu()
+        systemTrayMenu.showMenu()
         sleep 3000
         then:
         true

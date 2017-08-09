@@ -1,6 +1,7 @@
 package com.elgohr.concourse.notifier
 
 import com.elgohr.concourse.notifier.settings.SettingsView
+import com.elgohr.concourse.notifier.tray.SystemTrayMenu
 import spock.lang.Specification
 
 class ConcourseNotifierSpec extends Specification {
@@ -10,17 +11,25 @@ class ConcourseNotifierSpec extends Specification {
         def args = ["-c", "http://url",
                     "-t", "5",
                     "-d", "6"] as String[]
+        def systemTrayMock = Mock(SystemTrayMenu)
 
         when:
-        def notifier = new ConcourseNotifier(args, new Settings(), new SettingsView(new Settings()))
+        def notifier = new ConcourseNotifier(
+                args,
+                new Settings(),
+                new SettingsView(new Settings()),
+                systemTrayMock
+        )
         then:
         notifier.notificationFactory != null
         notifier.concourseService != null
         notifier.notificationScheduler != null
-        notifier.trayMenu != null
+        notifier.systemTrayMenu != null
         notifier.getSettings().getUrl().toString() == "http://url"
         notifier.getSettings().getCheckTimeInSecs() == 5
         notifier.getSettings().getNotificationTimeoutInSecs() == 6
+
+        1 * systemTrayMock.showMenu()
     }
 
     def "prevents mis-usage of arguments"() {
@@ -28,8 +37,13 @@ class ConcourseNotifierSpec extends Specification {
         def args = ["-d", "d",
                     "-t", "d",
                     "-c", "NO_URL"] as String[]
+
         when:
-        def notifier = new ConcourseNotifier(args, new Settings(), new SettingsView(new Settings()))
+        def notifier = new ConcourseNotifier(args,
+                new Settings(),
+                new SettingsView(new Settings()),
+                new SystemTrayMenu())
+
         then:
         notifier.getSettings().getUrl().toString() == "https://ci.concourse.ci"
         notifier.getSettings().getCheckTimeInSecs() == 5
@@ -42,7 +56,11 @@ class ConcourseNotifierSpec extends Specification {
         def settingsSpy = Spy(Settings)
         def settingsViewSpy = Mock(SettingsView, args: [settingsSpy])
         when:
-        new ConcourseNotifier(args, settingsSpy, settingsViewSpy)
+        new ConcourseNotifier(
+                args,
+                settingsSpy,
+                settingsViewSpy,
+                new SystemTrayMenu())
         then:
         1 * settingsViewSpy.showSettings()
         0 * settingsSpy.setUrl(_)
@@ -56,7 +74,11 @@ class ConcourseNotifierSpec extends Specification {
         def settingsSpy = Spy(Settings)
         def settingsViewSpy = Mock(SettingsView, args: [settingsSpy])
         when:
-        new ConcourseNotifier(args, settingsSpy, settingsViewSpy)
+        new ConcourseNotifier(
+                args,
+                settingsSpy,
+                settingsViewSpy,
+                new SystemTrayMenu())
         then:
         0 * settingsViewSpy.showSettings()
     }

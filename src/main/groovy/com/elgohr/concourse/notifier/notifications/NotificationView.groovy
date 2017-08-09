@@ -17,31 +17,39 @@ import java.awt.event.WindowEvent
 
 class NotificationView {
 
-    def final pipeline, jobName,
-              status, numberOfOpenNotifications,
-              timeoutInMillis
+    def final pipeline,
+              jobName,
+              status,
+              openNotifications,
+              notificationTimeoutMillis
+
+    private NotificationClickListener notificationClickListener
+    private JDialog dialog
 
     NotificationView(String pipeline,
                      String jobName,
+                     String jobUrl,
                      String status,
-                     int numberOfOpenNotifications,
-                     int timeoutInMillis) {
+                     int openNotifications,
+                     int notificationTimeoutMillis) {
         this.pipeline = pipeline
         this.jobName = jobName
         this.status = status
-        this.numberOfOpenNotifications = numberOfOpenNotifications
-        this.timeoutInMillis = timeoutInMillis
+        this.openNotifications = openNotifications
+        this.notificationTimeoutMillis = notificationTimeoutMillis
+        this.notificationClickListener = new NotificationClickListener(new URI(jobUrl))
     }
 
     def showNotification(Closure callback = {}) {
-        def dialog = createDialog()
+        dialog = createDialog()
         addComponents(dialog.getContentPane())
         showDialog(dialog)
         closeDialogAfterTimeout(dialog, callback)
     }
 
-    static def createDialog() {
+    def createDialog() {
         def dialog = new JDialog()
+        dialog.addMouseListener(notificationClickListener)
         dialog.setUndecorated true
         dialog.setAlwaysOnTop true
         dialog.setFocusableWindowState false
@@ -67,7 +75,7 @@ class NotificationView {
         contentPanel.add contentLabel, BorderLayout.CENTER
     }
 
-    def showDialog(def frame) {
+    def showDialog(JDialog frame) {
         frame.pack()
         def screen = GraphicsEnvironment
                 .getLocalGraphicsEnvironment()
@@ -78,16 +86,21 @@ class NotificationView {
                         screen,
                         toolkit,
                         frame,
-                        numberOfOpenNotifications)
+                        openNotifications)
         )
-        frame.setVisible(true)
+        frame.setVisible true
     }
 
     def closeDialogAfterTimeout(def frame, Closure callback) {
-        new Timer().runAfter(timeoutInMillis, {
+        new Timer().runAfter(notificationTimeoutMillis, {
             frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING))
             callback.run()
         })
     }
+
+    def getDialog() {
+        return dialog
+    }
+
 
 }

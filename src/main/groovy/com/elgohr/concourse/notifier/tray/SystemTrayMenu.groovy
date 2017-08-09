@@ -14,18 +14,17 @@ import java.awt.event.ActionListener
 @Slf4j
 class SystemTrayMenu {
 
-    def popupMenu, systemTray
+    def popupMenu, systemTray, trayIcon
 
     SystemTrayMenu() {
         systemTray = SystemTray
+        def popUpMenu = loadPopUpMenu()
+        loadTrayIcon(popUpMenu)
     }
 
-    def showMenu() {
+    private PopupMenu loadPopUpMenu() {
         popupMenu = new PopupMenu()
         popupMenu.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
-
-        def imageResource = getClass().getResource("/tray_icon.png")
-        def image = Toolkit.getDefaultToolkit().getImage(imageResource)
 
         def exitItem = new MenuItem("exit")
         exitItem.addActionListener(new ActionListener() {
@@ -35,15 +34,20 @@ class SystemTrayMenu {
             }
         })
         popupMenu.add exitItem
+        popupMenu
+    }
 
+    private void loadTrayIcon(PopupMenu popupMenu) {
+        def imageResource = getClass().getResource("/tray_icon.png")
+        def image = Toolkit.getDefaultToolkit().getImage(imageResource)
+        trayIcon = new TrayIcon(image, "Settings", popupMenu)
+        trayIcon.setImageAutoSize true
+    }
+
+    def showMenu() {
         try {
             if (systemTray.isSupported()) {
-                def trayIcon = new TrayIcon(image)
-                trayIcon.setImageAutoSize true
-                trayIcon.setPopupMenu(popupMenu)
-
-                def tray = systemTray.getSystemTray()
-                tray.add(trayIcon)
+                systemTray.getSystemTray().add(trayIcon)
             } else {
                 log.info "No support for tray icons on this system."
             }
