@@ -42,7 +42,7 @@ class ConcourseNotifierSpec extends Specification {
         def notifier = new ConcourseNotifier(args,
                 new Settings(),
                 new SettingsView(new Settings()),
-                new SystemTrayMenu())
+                Mock(SystemTrayMenu))
 
         then:
         notifier.getSettings().getUrl().toString() == "https://ci.concourse.ci"
@@ -60,7 +60,7 @@ class ConcourseNotifierSpec extends Specification {
                 args,
                 settingsSpy,
                 settingsViewSpy,
-                new SystemTrayMenu())
+                Mock(SystemTrayMenu))
         then:
         1 * settingsViewSpy.showSettings()
         0 * settingsSpy.setUrl(_)
@@ -78,7 +78,7 @@ class ConcourseNotifierSpec extends Specification {
                 args,
                 settingsSpy,
                 settingsViewSpy,
-                new SystemTrayMenu())
+                Mock(SystemTrayMenu))
         then:
         0 * settingsViewSpy.showSettings()
     }

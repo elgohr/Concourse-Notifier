@@ -18,8 +18,20 @@ class SystemTrayMenu {
 
     SystemTrayMenu() {
         systemTray = SystemTray
-        def popUpMenu = loadPopUpMenu()
-        loadTrayIcon(popUpMenu)
+    }
+
+    def showMenu() {
+        try {
+            if (systemTray.isSupported()) {
+                def popUpMenu = loadPopUpMenu()
+                loadTrayIcon(popUpMenu)
+                systemTray.getSystemTray().add(trayIcon)
+            } else {
+                log.info "No support for tray icons on this system."
+            }
+        } catch (Exception e) {
+            log.error "TrayIcon could not be added."
+        }
     }
 
     private PopupMenu loadPopUpMenu() {
@@ -42,18 +54,6 @@ class SystemTrayMenu {
         def image = Toolkit.getDefaultToolkit().getImage(imageResource)
         trayIcon = new TrayIcon(image, "Settings", popupMenu)
         trayIcon.setImageAutoSize true
-    }
-
-    def showMenu() {
-        try {
-            if (systemTray.isSupported()) {
-                systemTray.getSystemTray().add(trayIcon)
-            } else {
-                log.info "No support for tray icons on this system."
-            }
-        } catch (Exception e) {
-            log.error "TrayIcon could not be added."
-        }
     }
 
     def getPopupMenu() {
