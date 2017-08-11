@@ -2,9 +2,6 @@ package com.elgohr.concourse.notifier.tray
 
 import groovy.util.logging.Slf4j
 
-import java.awt.Font
-import java.awt.MenuItem
-import java.awt.PopupMenu
 import java.awt.SystemTray
 import java.awt.Toolkit
 import java.awt.TrayIcon
@@ -14,17 +11,16 @@ import java.awt.event.ActionListener
 @Slf4j
 class SystemTrayMenu {
 
-    def popupMenu, systemTray, trayIcon
+    def systemTray, trayIcon
 
     SystemTrayMenu() {
         this.systemTray = SystemTray
     }
 
-    def showMenu() {
+    def showIcon() {
         try {
             if (systemTray.isSupported()) {
-                def popUpMenu = loadPopUpMenu()
-                loadTrayIcon(popUpMenu)
+                loadTrayIcon()
                 systemTray.getSystemTray().add(trayIcon)
             } else {
                 log.info "No support for tray icons on this system."
@@ -34,29 +30,22 @@ class SystemTrayMenu {
         }
     }
 
-    private PopupMenu loadPopUpMenu() {
-        popupMenu = new PopupMenu()
-        popupMenu.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
-
-        def exitItem = new MenuItem("exit")
-        exitItem.addActionListener(new ActionListener() {
-            @Override
-            void actionPerformed(ActionEvent e) {
-                System.exit(0)
-            }
-        })
-        popupMenu.add exitItem
-        popupMenu
-    }
-
-    private void loadTrayIcon(PopupMenu popupMenu) {
+    private void loadTrayIcon() {
         def imageResource = getClass().getResource("/tray_icon.png")
         def image = Toolkit.getDefaultToolkit().getImage(imageResource)
-        trayIcon = new TrayIcon(image, "Settings", popupMenu)
+        trayIcon = new TrayIcon(image, "Close application")
+        trayIcon.addActionListener(new CloseApplicationListener())
         trayIcon.setImageAutoSize true
     }
 
-    def getPopupMenu() {
-        return popupMenu
+    TrayIcon getTrayIcon() {
+        return trayIcon
+    }
+
+    static class CloseApplicationListener implements ActionListener {
+        @Override
+        void actionPerformed(ActionEvent e) {
+            System.exit(0)
+        }
     }
 }

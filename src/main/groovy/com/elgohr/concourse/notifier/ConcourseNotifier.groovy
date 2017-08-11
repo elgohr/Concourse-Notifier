@@ -1,6 +1,7 @@
 package com.elgohr.concourse.notifier
 
 import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
+import com.elgohr.concourse.notifier.api.HttpClient
 import com.elgohr.concourse.notifier.notifications.NotificationFactoryImpl
 import com.elgohr.concourse.notifier.notifications.NotificationSchedulerImpl
 import com.elgohr.concourse.notifier.settings.SettingsView
@@ -33,12 +34,13 @@ class ConcourseNotifier {
                       SystemTrayMenu systemTrayMenu) {
         this.settings = settings
         checkArguments(args)
-        if (hasNoArguments(args)) {
+        if (hasNoBaseUrl(args) || hasNoArguments(args)) {
             settingsView.showSettings()
         }
+
         this.systemTrayMenu = systemTrayMenu
-        systemTrayMenu.showMenu()
-        concourseService = new ConcourseServiceImpl(settings)
+        systemTrayMenu.showIcon()
+        concourseService = new ConcourseServiceImpl(settings, new HttpClient())
         notificationFactory = new NotificationFactoryImpl(settings)
         notificationScheduler = new NotificationSchedulerImpl(
                 concourseService,
@@ -73,6 +75,10 @@ class ConcourseNotifier {
 
     private static hasNoArguments(String[] args) {
         return args.length == 0
+    }
+
+    private static hasNoBaseUrl(String[] args) {
+        return args.length > 0 && !args.contains("-c")
     }
 
 }

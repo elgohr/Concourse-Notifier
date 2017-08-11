@@ -2,12 +2,13 @@ package com.elgohr.concourse.notifier.api
 
 class Job {
 
-    def final name, pipeline, url, status
+    private final String name, pipeline, status
+    private final URL url
 
-    Job(name, pipeline, url, status) {
+    Job(String name, String pipeline, URL url, String status) {
         this.name = name
         this.pipeline = (pipeline == null) ? "" : pipeline
-        this.url = (url == null) ? "" : url
+        this.url = url
         this.status = (status == null) ? "" : status
     }
 

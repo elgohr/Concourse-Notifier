@@ -4,6 +4,7 @@ import com.elgohr.concourse.notifier.ConcourseService
 import com.elgohr.concourse.notifier.NotificationFactory
 import com.elgohr.concourse.notifier.NotificationScheduler
 import com.elgohr.concourse.notifier.api.Job
+import com.elgohr.concourse.notifier.api.Pipeline
 import groovy.util.logging.Slf4j
 
 import java.util.concurrent.ScheduledExecutorService
@@ -29,18 +30,21 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     }
 
     def doCheck() {
-        def newJobs = concourseService.getJobs()
-        if (!initialized()) {
-            for (Job job in newJobs) {
-                jobBuffer.put(job.getKey(), job)
-                log.debug "$job.pipeline - $job.name : Added with status $job.status"
-            }
-        } else {
-            for (Job job in newJobs) {
-                if (jobHasChanged(job)) {
-                    log.info "$job.pipeline - $job.name : Changed status to $job.status"
-                    notificationFactory.createNotification(job.name, job.pipeline, job.url, job.status)
+        def pipelines = concourseService.getPipelines()
+        for (Pipeline pipeline in pipelines) {
+            def newJobs = concourseService.getJobs(pipeline)
+            if (!initialized()) {
+                for (Job job in newJobs) {
                     jobBuffer.put(job.getKey(), job)
+                    log.debug "$job.pipeline - $job.name : Added with status $job.status"
+                }
+            } else {
+                for (Job job in newJobs) {
+                    if (jobHasChanged(job)) {
+                        log.info "$job.pipeline - $job.name : Changed status to $job.status"
+                        notificationFactory.createNotification(job.name, job.pipeline, job.url.toString(), job.status)
+                        jobBuffer.put(job.getKey(), job)
+                    }
                 }
             }
         }

@@ -1,10 +1,12 @@
 package com.elgohr.concourse.notifier
 
 import com.elgohr.concourse.notifier.api.Job
+import com.elgohr.concourse.notifier.api.Pipeline
 
 
 interface ConcourseService {
 
-    List<Job> getJobs()
+    List<Pipeline> getPipelines()
+    List<Job> getJobs(Pipeline pipeline)
 
 }

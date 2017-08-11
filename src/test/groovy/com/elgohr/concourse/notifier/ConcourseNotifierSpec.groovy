@@ -29,7 +29,7 @@ class ConcourseNotifierSpec extends Specification {
         notifier.getSettings().getCheckTimeInSecs() == 5
         notifier.getSettings().getNotificationTimeoutInSecs() == 6
 
-        1 * systemTrayMock.showMenu()
+        1 * systemTrayMock.showIcon()
     }
 
     def "prevents mis-usage of arguments"() {
@@ -81,6 +81,21 @@ class ConcourseNotifierSpec extends Specification {
                 Mock(SystemTrayMenu))
         then:
         0 * settingsViewSpy.showSettings()
+    }
+
+    def "shows settings view arguments given but no base-url (-c) present"() {
+        given:
+        def args = ["-x"] as String[]
+        def settingsSpy = Spy(Settings)
+        def settingsViewSpy = Mock(SettingsView, args: [settingsSpy])
+        when:
+        new ConcourseNotifier(
+                args,
+                settingsSpy,
+                settingsViewSpy,
+                Mock(SystemTrayMenu))
+        then:
+        1 * settingsViewSpy.showSettings()
     }
 
 }
