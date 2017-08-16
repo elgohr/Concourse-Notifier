@@ -1,5 +1,6 @@
 package com.elgohr.concourse.notifier.tray
 
+import com.elgohr.concourse.notifier.Settings
 import groovy.util.logging.Slf4j
 
 import java.awt.SystemTray
@@ -11,10 +12,11 @@ import java.awt.event.ActionListener
 @Slf4j
 class SystemTrayMenu {
 
-    def systemTray, trayIcon
+    def systemTray, trayIcon, settings
 
-    SystemTrayMenu() {
+    SystemTrayMenu(Settings settings) {
         this.systemTray = SystemTray
+        this.settings = settings
     }
 
     def showIcon() {
@@ -33,8 +35,8 @@ class SystemTrayMenu {
     private void loadTrayIcon() {
         def imageResource = getClass().getResource("/tray_icon.png")
         def image = Toolkit.getDefaultToolkit().getImage(imageResource)
-        trayIcon = new TrayIcon(image, "Close application")
-        trayIcon.addActionListener(new CloseApplicationListener())
+        trayIcon = new TrayIcon(image, "Concourse Notifier")
+        trayIcon.addActionListener(new OpenSettingViewListener(settings))
         trayIcon.setImageAutoSize true
     }
 
@@ -42,10 +44,18 @@ class SystemTrayMenu {
         return trayIcon
     }
 
-    static class CloseApplicationListener implements ActionListener {
+    static class OpenSettingViewListener implements ActionListener {
+
+        Settings settings
+
+        OpenSettingViewListener(Settings settings) {
+            this.settings = settings
+        }
+
         @Override
         void actionPerformed(ActionEvent e) {
-            System.exit(0)
+            settings.getSettingsView().showSettings()
         }
     }
+
 }

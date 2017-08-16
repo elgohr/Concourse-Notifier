@@ -323,5 +323,4 @@ class ConcourseServiceImplSpec extends Specification {
         pipelines[1].url.toString() == "http://baseUrl/api/v1/teams/main/pipelines/resources"
     }
 
-
 }

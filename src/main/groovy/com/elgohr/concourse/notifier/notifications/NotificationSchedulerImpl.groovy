@@ -30,22 +30,30 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     }
 
     def doCheck() {
-        def pipelines = concourseService.getPipelines()
-        for (Pipeline pipeline in pipelines) {
-            def newJobs = concourseService.getJobs(pipeline)
-            if (!initialized()) {
-                for (Job job in newJobs) {
+        if (!initialized()) {
+            initializeJobBuffer()
+        } else {
+            updateJobs()
+        }
+    }
+
+    private void updateJobs() {
+        for (Pipeline pipeline in concourseService.getPipelines()) {
+            for (Job job in concourseService.getJobs(pipeline)) {
+                if (jobHasChanged(job)) {
+                    log.info "$job.pipeline - $job.name : Changed status to $job.status"
+                    notificationFactory.createNotification(job.name, job.pipeline, job.url.toString(), job.status)
                     jobBuffer.put(job.getKey(), job)
-                    log.debug "$job.pipeline - $job.name : Added with status $job.status"
                 }
-            } else {
-                for (Job job in newJobs) {
-                    if (jobHasChanged(job)) {
-                        log.info "$job.pipeline - $job.name : Changed status to $job.status"
-                        notificationFactory.createNotification(job.name, job.pipeline, job.url.toString(), job.status)
-                        jobBuffer.put(job.getKey(), job)
-                    }
-                }
+            }
+        }
+    }
+
+    private void initializeJobBuffer() {
+        for (Pipeline pipeline in concourseService.getPipelines()) {
+            for (Job job in concourseService.getJobs(pipeline)) {
+                jobBuffer.put(job.getKey(), job)
+                log.debug "$job.pipeline - $job.name : Added with status $job.status"
             }
         }
     }

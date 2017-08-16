@@ -24,18 +24,16 @@ class ConcourseNotifier {
         new ConcourseNotifier(
                 args,
                 settings,
-                new SettingsView(settings),
-                new SystemTrayMenu())
+                new SystemTrayMenu(settings))
     }
 
     ConcourseNotifier(String[] args,
                       Settings settings,
-                      SettingsView settingsView,
                       SystemTrayMenu systemTrayMenu) {
         this.settings = settings
         checkArguments(args)
         if (hasNoBaseUrl(args) || hasNoArguments(args)) {
-            settingsView.showSettings()
+            settings.getSettingsView().showSettings()
         }
 
         this.systemTrayMenu = systemTrayMenu

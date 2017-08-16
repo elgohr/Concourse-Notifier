@@ -1,6 +1,7 @@
 package com.elgohr.concourse.notifier.tray
 
-import org.codehaus.groovy.tools.shell.util.NoExitSecurityManager
+import com.elgohr.concourse.notifier.Settings
+import com.elgohr.concourse.notifier.settings.SettingsView
 import spock.lang.Specification
 
 import java.awt.SystemTray
@@ -31,7 +32,7 @@ class SystemTrayMenuSpec extends Specification {
 
         def trayIcon = systemTray.getTrayIcon()
         trayIcon.getActionListeners().toArrayString()
-                .contains("CloseApplicationListener")
+                .contains("OpenSettingViewListener")
     }
 
     def "contains no tray icon when systemtray is not supported"() {
@@ -48,21 +49,18 @@ class SystemTrayMenuSpec extends Specification {
         systemTray.getTrayIcon() == null
     }
 
-    def "CloseApplicationListener - closes the application when called"() {
+    def "OpenSettingViewListener - opens settings on click"() {
         given:
-        def previousSecurityManager = System.getSecurityManager()
-        def noExitSecurityManager = new NoExitSecurityManager()
-        System.setSecurityManager noExitSecurityManager
-
-        def closeApplicationListener = new SystemTrayMenu.CloseApplicationListener()
+        def settings = Mock(Settings)
+        def settingsView = Mock(SettingsView)
+        def closeApplicationListener = new SystemTrayMenu.OpenSettingViewListener(settings)
 
         when:
         closeApplicationListener.actionPerformed(Mock(ActionEvent))
 
         then:
-        thrown SecurityException
-
-        cleanup:
-        System.setSecurityManager previousSecurityManager
+        1 * settings.getSettingsView() >> settingsView
+        1 * settingsView.showSettings()
     }
+
 }

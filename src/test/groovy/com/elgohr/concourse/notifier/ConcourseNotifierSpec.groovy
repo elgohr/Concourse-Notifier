@@ -17,7 +17,6 @@ class ConcourseNotifierSpec extends Specification {
         def notifier = new ConcourseNotifier(
                 args,
                 new Settings(),
-                new SettingsView(new Settings()),
                 systemTrayMock
         )
         then:
@@ -41,7 +40,6 @@ class ConcourseNotifierSpec extends Specification {
         when:
         def notifier = new ConcourseNotifier(args,
                 new Settings(),
-                new SettingsView(new Settings()),
                 Mock(SystemTrayMenu))
 
         then:
@@ -59,9 +57,9 @@ class ConcourseNotifierSpec extends Specification {
         new ConcourseNotifier(
                 args,
                 settingsSpy,
-                settingsViewSpy,
                 Mock(SystemTrayMenu))
         then:
+        1 * settingsSpy.getSettingsView() >> settingsViewSpy
         1 * settingsViewSpy.showSettings()
         0 * settingsSpy.setUrl(_)
         0 * settingsSpy.setCheckTimeInSecs(_)
@@ -72,15 +70,13 @@ class ConcourseNotifierSpec extends Specification {
         given:
         def args = ["-c", "http://url"] as String[]
         def settingsSpy = Spy(Settings)
-        def settingsViewSpy = Mock(SettingsView, args: [settingsSpy])
         when:
         new ConcourseNotifier(
                 args,
                 settingsSpy,
-                settingsViewSpy,
                 Mock(SystemTrayMenu))
         then:
-        0 * settingsViewSpy.showSettings()
+        0 * settingsSpy.getSettingsView()
     }
 
     def "shows settings view arguments given but no base-url (-c) present"() {
@@ -92,9 +88,9 @@ class ConcourseNotifierSpec extends Specification {
         new ConcourseNotifier(
                 args,
                 settingsSpy,
-                settingsViewSpy,
                 Mock(SystemTrayMenu))
         then:
+        1 * settingsSpy.getSettingsView() >> settingsViewSpy
         1 * settingsViewSpy.showSettings()
     }
 

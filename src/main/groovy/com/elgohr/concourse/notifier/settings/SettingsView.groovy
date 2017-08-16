@@ -1,5 +1,6 @@
 package com.elgohr.concourse.notifier.settings
 
+import com.elgohr.concourse.notifier.CloseApplicationListener
 import com.elgohr.concourse.notifier.Settings
 import com.elgohr.concourse.notifier.ViewUtil
 import com.elgohr.concourse.notifier.notifications.ConcourseColors
@@ -73,7 +74,7 @@ class SettingsView {
         dialog.setUndecorated true
         dialog.setAlwaysOnTop true
         dialog.setFocusableWindowState true
-        dialog.setPreferredSize new Dimension(300, 120)
+        dialog.setPreferredSize new Dimension(300, 160)
         dialog.getContentPane().setBackground ConcourseColors.TITLEBAR_BACKGROUND
         dialog
     }
@@ -102,6 +103,17 @@ class SettingsView {
         addOptions(content, basicOptions)
 
         addSaveButton(content)
+        content.add Box.createRigidArea(new Dimension(0, 10))
+        addQuitButton(content)
+    }
+
+    private static void addQuitButton(JPanel content) {
+        def quitButton = new JButton("quit")
+        quitButton.setBorder BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        quitButton.setForeground ConcourseColors.TEXT
+        quitButton.setBackground ConcourseColors.BACKGROUND
+        quitButton.addActionListener(new CloseApplicationListener())
+        content.add quitButton
     }
 
     private void addSaveButton(JPanel content) {

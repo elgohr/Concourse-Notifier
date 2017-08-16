@@ -31,18 +31,23 @@ class NotificationSchedulerImplSpec extends Specification {
 
     def "initially loads jobs without notification"() {
         given:
-        def pipelines = [new Pipeline("NAME", "TEAM", new URL("http://URL"))]
+        def pipeline1 = new Pipeline("NAME", "TEAM", new URL("http://URL"))
+        def pipeline2 = new Pipeline("NAME1", "TEAM1", new URL("http://URL"))
 
-        def jobs = [new Job("NAME", "PIPELINE", new URL("http://URL"), "STATUS"),
-                    new Job("NAME1", "PIPELINE1", new URL("http://URL1"), "STATUS1"),
-                    new Job("NAME2", "PIPELINE2", new URL("http://URL2"), "STATUS2")]
         when:
         scheduler.doCheck()
+
         then:
-        1 * mockConcourseService.getPipelines() >> pipelines
-        1 * mockConcourseService.getJobs(pipelines[0]) >> jobs
-        scheduler.jobBuffer.containsKey("PIPELINE.NAME") == true
-        scheduler.jobBuffer.get("PIPELINE.NAME") == jobs[0]
+        1 * mockConcourseService.getPipelines() >> [pipeline1, pipeline2]
+        1 * mockConcourseService.getJobs(pipeline1) >>
+                [new Job("NAME", "PIPELINE1", new URL("http://URL"), "STATUS"),
+                 new Job("NAME1", "PIPELINE1", new URL("http://URL1"), "STATUS1"),
+                 new Job("NAME2", "PIPELINE1", new URL("http://URL2"), "STATUS2")]
+        1 * mockConcourseService.getJobs(pipeline2) >>
+                [new Job("NAME", "PIPELINE2", new URL("http://URL"), "STATUS"),
+                 new Job("NAME1", "PIPELINE2", new URL("http://URL1"), "STATUS1"),
+                 new Job("NAME2", "PIPELINE2", new URL("http://URL2"), "STATUS2")]
+        scheduler.jobBuffer.size() == 6
         0 * mockNotificationFactory.createNotification(_, _, _, _)
     }
 
