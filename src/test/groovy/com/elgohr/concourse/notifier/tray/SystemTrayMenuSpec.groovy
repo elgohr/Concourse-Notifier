@@ -11,7 +11,7 @@ class SystemTrayMenuSpec extends Specification {
 
     def "creates a tray icon for visual check"() {
         given:
-        def systemTrayMenu = new SystemTrayMenu()
+        def systemTrayMenu = new SystemTrayMenu(Mock(Settings))
         when:
         systemTrayMenu.showIcon()
         sleep 2000
@@ -22,7 +22,7 @@ class SystemTrayMenuSpec extends Specification {
     def "tray icon closes the application when clicked"() {
         given:
         def systemTraySpy = GroovySpy(SystemTray, global: true)
-        def systemTray = new SystemTrayMenu()
+        def systemTray = new SystemTrayMenu(Mock(Settings))
         systemTray.systemTray = systemTraySpy
 
         when:
@@ -38,7 +38,7 @@ class SystemTrayMenuSpec extends Specification {
     def "contains no tray icon when systemtray is not supported"() {
         given:
         def systemTraySpy = GroovySpy(SystemTray, global: true)
-        def systemTray = new SystemTrayMenu()
+        def systemTray = new SystemTrayMenu(Mock(Settings))
         systemTray.systemTray = systemTraySpy
 
         when:

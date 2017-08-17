@@ -1,5 +1,6 @@
 package com.elgohr.concourse.notifier.notifications
 
+import com.elgohr.concourse.notifier.Buffer
 import com.elgohr.concourse.notifier.Settings
 import com.elgohr.concourse.notifier.api.ConcourseServiceImpl
 import com.elgohr.concourse.notifier.api.HttpClient
@@ -12,17 +13,19 @@ import java.util.concurrent.TimeUnit
 
 class NotificationSchedulerImplSpec extends Specification {
 
-    def scheduler, mockConcourseService, mockNotificationFactory, spyCheckPool
+    def scheduler, mockConcourseService, mockNotificationFactory, spyCheckPool, mockBuffer
 
     void setup() {
         def arguments = [new Settings(), Mock(HttpClient)]
         mockConcourseService = Mock(ConcourseServiceImpl, constructorArgs: arguments)
         mockNotificationFactory = Mock(NotificationFactoryImpl)
+        mockBuffer = Mock(Buffer)
         spyCheckPool = Spy(ScheduledThreadPoolExecutor, constructorArgs: [1])
         scheduler = new NotificationSchedulerImpl(
                 mockConcourseService,
                 mockNotificationFactory,
-                spyCheckPool)
+                spyCheckPool,
+                mockBuffer)
     }
 
     void cleanup() {
@@ -41,21 +44,22 @@ class NotificationSchedulerImplSpec extends Specification {
         1 * mockConcourseService.getPipelines() >> [pipeline1, pipeline2]
         1 * mockConcourseService.getJobs(pipeline1) >>
                 [new Job("NAME", "PIPELINE1", new URL("http://URL"), "STATUS"),
-                 new Job("NAME1", "PIPELINE1", new URL("http://URL1"), "STATUS1"),
-                 new Job("NAME2", "PIPELINE1", new URL("http://URL2"), "STATUS2")]
+                 new Job("NAME1", "PIPELINE1", new URL("http://URL1"), "STATUS1")]
         1 * mockConcourseService.getJobs(pipeline2) >>
                 [new Job("NAME", "PIPELINE2", new URL("http://URL"), "STATUS"),
-                 new Job("NAME1", "PIPELINE2", new URL("http://URL1"), "STATUS1"),
-                 new Job("NAME2", "PIPELINE2", new URL("http://URL2"), "STATUS2")]
-        scheduler.jobBuffer.size() == 6
+                 new Job("NAME1", "PIPELINE2", new URL("http://URL1"), "STATUS1")]
+        1 * mockBuffer.getJobs() >> []
+        4 * mockBuffer.setJob(_, _)
         0 * mockNotificationFactory.createNotification(_, _, _, _)
     }
 
     def "creates notifications for jobs when added after initialization"() {
-        given:
-        scheduler.jobBuffer = ["OLD_NAME": new Job("OLD_NAME", "OLD_PIPELINE", new URL("http://OLD_URL"), "OLD_STATUS")]
+        setup:
+        mockBuffer.getJobs() >> ["OLD_NAME": new Job("OLD_NAME", "OLD_PIPELINE", new URL("http://OLD_URL"), "OLD_STATUS")]
+
         when:
         scheduler.doCheck()
+
         then:
         1 * mockConcourseService.getPipelines() >> [new Pipeline("NAME", "TEAM", new URL("http://URL"))]
         1 * mockConcourseService.getJobs(_) >>
@@ -65,10 +69,12 @@ class NotificationSchedulerImplSpec extends Specification {
     }
 
     def "creates notifications for jobs when changed"() {
-        given:
-        scheduler.jobBuffer = ["NAME": new Job("NAME", "OLD_PIPELINE", new URL("http://OLD_URL"), "OLD_STATUS")]
+        setup:
+        mockBuffer.getJobs() >> ["NAME": new Job("NAME", "OLD_PIPELINE", new URL("http://OLD_URL"), "OLD_STATUS")]
+
         when:
         scheduler.doCheck()
+
         then:
         1 * mockConcourseService.getPipelines() >> [new Pipeline("NAME", "TEAM", new URL("http://URL"))]
         1 * mockConcourseService.getJobs(_) >>
@@ -77,10 +83,12 @@ class NotificationSchedulerImplSpec extends Specification {
     }
 
     def "does not create notifications for jobs when not changed"() {
-        given:
-        scheduler.jobBuffer = ["OLD_PIPELINE.OLD_NAME": new Job("OLD_NAME", "OLD_PIPELINE", new URL("http://OLD_URL"), "OLD_STATUS")]
+        setup:
+        mockBuffer.getJobs() >> ["OLD_PIPELINE.OLD_NAME": new Job("OLD_NAME", "OLD_PIPELINE", new URL("http://OLD_URL"), "OLD_STATUS")]
+
         when:
         scheduler.doCheck()
+
         then:
         1 * mockConcourseService.getPipelines() >> [new Pipeline("NAME", "TEAM", new URL("http://URL"))]
         1 * mockConcourseService.getJobs(_) >>

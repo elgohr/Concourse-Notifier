@@ -1,5 +1,6 @@
 package com.elgohr.concourse.notifier.notifications
 
+import com.elgohr.concourse.notifier.Buffer
 import com.elgohr.concourse.notifier.ConcourseService
 import com.elgohr.concourse.notifier.NotificationFactory
 import com.elgohr.concourse.notifier.NotificationScheduler
@@ -13,15 +14,16 @@ import java.util.concurrent.TimeUnit
 @Slf4j
 class NotificationSchedulerImpl implements NotificationScheduler {
 
-    def jobBuffer = [] as HashMap<String, Job>
-    def final concourseService, notificationFactory, checker
+    def final concourseService, notificationFactory, checker, buffer
 
     NotificationSchedulerImpl(ConcourseService concourseService,
                               NotificationFactory notificationFactory,
-                              ScheduledExecutorService checkPool) {
+                              ScheduledExecutorService checkPool,
+                              Buffer buffer) {
         this.concourseService = concourseService
         this.notificationFactory = notificationFactory
         this.checker = checkPool
+        this.buffer = buffer
     }
 
     def startCheck() {
@@ -43,7 +45,7 @@ class NotificationSchedulerImpl implements NotificationScheduler {
                 if (jobHasChanged(job)) {
                     log.info "$job.pipeline - $job.name : Changed status to $job.status"
                     notificationFactory.createNotification(job.name, job.pipeline, job.url.toString(), job.status)
-                    jobBuffer.put(job.getKey(), job)
+                    buffer.setJob(job.getKey(), job)
                 }
             }
         }
@@ -52,7 +54,7 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     private void initializeJobBuffer() {
         for (Pipeline pipeline in concourseService.getPipelines()) {
             for (Job job in concourseService.getJobs(pipeline)) {
-                jobBuffer.put(job.getKey(), job)
+                buffer.setJob(job.getKey(), job)
                 log.debug "$job.pipeline - $job.name : Added with status $job.status"
             }
         }
@@ -63,12 +65,12 @@ class NotificationSchedulerImpl implements NotificationScheduler {
     }
 
     private boolean initialized() {
-        jobBuffer.size() > 0
+        buffer.getJobs().size() > 0
     }
 
     private boolean jobHasChanged(Job job) {
-        !jobBuffer.containsKey(job.getKey()) ||
-                jobBuffer.get(job.getKey()).getStatus() != job.getStatus()
+        !buffer.getJobs().containsKey(job.getKey()) ||
+                buffer.getJobs().get(job.getKey()).getStatus() != job.getStatus()
     }
 
 }

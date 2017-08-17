@@ -20,6 +20,7 @@ import java.awt.Container
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.GraphicsEnvironment
+import java.awt.Point
 import java.awt.Toolkit
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
@@ -50,17 +51,13 @@ class SettingsView {
 
     static def showDialog(JFrame frame) {
         frame.pack()
-        def screen = GraphicsEnvironment
+        def final screen = GraphicsEnvironment
                 .getLocalGraphicsEnvironment()
                 .getDefaultScreenDevice()
-        def toolkit = Toolkit.getDefaultToolkit()
-        frame.setLocation(
-                ViewUtil.getPosition(
-                        screen,
-                        toolkit,
-                        frame,
-                        1)
-        )
+        def final toolkit = Toolkit.getDefaultToolkit()
+        def final numberOfComponents = 1
+        def final position = ViewUtil.getPosition(screen, toolkit, frame, numberOfComponents) as Point
+        frame.setLocation(position)
         frame.setVisible true
     }
 
