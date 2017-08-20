@@ -4,7 +4,6 @@ import com.elgohr.concourse.notifier.Buffer
 import com.elgohr.concourse.notifier.Settings
 import com.elgohr.concourse.notifier.api.Pipeline
 import org.codehaus.groovy.tools.shell.util.NoExitSecurityManager
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import javax.swing.JButton
@@ -14,19 +13,25 @@ import java.awt.Component
 
 class SettingsViewSpec extends Specification {
 
+    def bufferMock, settings
+
+    void setup() {
+        bufferMock = Mock(Buffer)
+        settings = new Settings(bufferMock)
+        bufferMock.getPipelines() >>
+                [new Pipeline("PIPELINE1", "TEAM", new URL("http://URL")),
+                 new Pipeline("PIPELINE2", "TEAM1", new URL("http://URL")),
+                 new Pipeline("PIPELINE2", "TEAM1", new URL("http://URL"))]
+    }
+
     def "show settings for visual check"() {
-        given:
-        def settings = new Settings()
-        def settingsView = new SettingsView(settings)
         when:
-        settingsView.showSettings()
+        settings.getSettingsView().showSettings()
         then:
-        sleep 2000
+        sleep 3000
     }
 
     def "is shown with the right label"() {
-        given:
-        def settings = new Settings()
         when:
         settings.getSettingsView().showSettings()
         then:
@@ -37,8 +42,6 @@ class SettingsViewSpec extends Specification {
     }
 
     def "shows url in settings"() {
-        given:
-        def settings = new Settings()
         when:
         settings.getSettingsView().showSettings()
         then:
@@ -49,8 +52,6 @@ class SettingsViewSpec extends Specification {
     }
 
     def "shows save button"() {
-        given:
-        def settings = new Settings()
         when:
         settings.getSettingsView().showSettings()
         then:
@@ -61,7 +62,7 @@ class SettingsViewSpec extends Specification {
 
     def "saves settings and hides window with button click"() {
         given:
-        def settings = Spy(Settings)
+        def settings = Spy(Settings, constructorArgs: [bufferMock])
         def settingsView = settings.getSettingsView()
         settingsView.showSettings()
         when:
@@ -74,13 +75,11 @@ class SettingsViewSpec extends Specification {
     }
 
     def "shows quit button"() {
-        given:
-        def settings = new Settings()
-        def settingsView = settings.getSettingsView()
         when:
-        settingsView.showSettings()
+        settings.getSettingsView().showSettings()
         then:
-        def content = settingsView.getDialog().getContentPane().getComponents()[1]
+        def content = settings.getSettingsView()
+                .getDialog().getContentPane().getComponents()[1]
         findComponentByText(content.getComponents(), "quit") != null
     }
 
@@ -90,7 +89,7 @@ class SettingsViewSpec extends Specification {
         def noExitSecurityManager = new NoExitSecurityManager()
         System.setSecurityManager noExitSecurityManager
 
-        def settings = Spy(Settings)
+        def settings = Spy(Settings, constructorArgs: [bufferMock])
         def settingsView = new SettingsView(settings)
         settingsView.showSettings()
         when:
@@ -104,22 +103,26 @@ class SettingsViewSpec extends Specification {
         System.setSecurityManager previousSecurityManager
     }
 
-    @Ignore
     def "shows pipelines"() {
-        given:
-        def buffer = Mock(Buffer)
-        def settings = new Settings(buffer)
-        def settingsView = settings.getSettingsView()
         when:
-        settingsView.showSettings()
+        settings.getSettingsView().showSettings()
         then:
-        1 * buffer.getPipelines() >>
+        2 * bufferMock.getPipelines() >>
                 [new Pipeline("PIPELINE1", "TEAM", new URL("http://URL")),
                  new Pipeline("PIPELINE2", "TEAM1", new URL("http://URL"))]
-        def content = settingsView.getDialog().getContentPane().getComponents()[1]
-        findComponentByText(content.getComponents(), "quit") != null
+        def content = settings.getSettingsView()
+                .getDialog().getContentPane().getComponents()[1]
         findComponentByText(content.getComponents(), "PIPELINE1") != null
         findComponentByText(content.getComponents(), "PIPELINE2") != null
+    }
+
+    def "handles view with no pipelines pipelines"() {
+        when:
+        settings.getSettingsView().showSettings()
+        then:
+        2 * bufferMock.getPipelines() >> []
+        settings.getSettingsView()
+                .getDialog().getContentPane().getComponents()[1] != null
     }
 
     private static Component findComponentByText(Component[] components, String text) {

@@ -3,6 +3,7 @@ package com.elgohr.concourse.notifier.settings
 import com.elgohr.concourse.notifier.CloseApplicationListener
 import com.elgohr.concourse.notifier.Settings
 import com.elgohr.concourse.notifier.ViewUtil
+import com.elgohr.concourse.notifier.api.Pipeline
 import com.elgohr.concourse.notifier.notifications.ConcourseColors
 
 import javax.swing.BorderFactory
@@ -12,6 +13,7 @@ import javax.swing.JButton
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JSeparator
 import javax.swing.JTextField
 import javax.swing.SwingConstants
 import javax.swing.WindowConstants
@@ -65,13 +67,14 @@ class SettingsView {
         return dialog
     }
 
-    private static def createMainView() {
+    private def createMainView() {
         def dialog = new JFrame()
         dialog.setDefaultCloseOperation WindowConstants.HIDE_ON_CLOSE
         dialog.setUndecorated true
         dialog.setAlwaysOnTop true
         dialog.setFocusableWindowState true
-        dialog.setPreferredSize new Dimension(300, 160)
+        def numberOfPipelines = settings.getBuffer().getPipelines().size()
+        dialog.setPreferredSize new Dimension(300, 160 + (numberOfPipelines * 30))
         dialog.getContentPane().setBackground ConcourseColors.TITLEBAR_BACKGROUND
         dialog
     }
@@ -99,9 +102,47 @@ class SettingsView {
         def basicOptions = ["url": settings.getUrl()]
         addOptions(content, basicOptions)
 
+        def pipelines = settings.getBuffer().getPipelines()
+        addPipelines(content, pipelines)
+
+        content.add Box.createRigidArea(new Dimension(0, 10))
+
         addSaveButton(content)
         content.add Box.createRigidArea(new Dimension(0, 10))
         addQuitButton(content)
+    }
+
+    private static void addPipelines(JPanel content, Collection<Pipeline> pipelines) {
+        if (pipelines.size() > 0) {
+            def lastElement = pipelines.last()
+            for (def pipeline in pipelines) {
+                def pipelineField = createPipelineField(pipeline)
+                content.add pipelineField
+
+                if (isNotLastItem(pipeline, lastElement)) {
+                    addSeparator(content)
+                }
+            }
+        }
+    }
+
+    private static boolean isNotLastItem(Pipeline current, Pipeline last) {
+        current != last
+    }
+
+    private static void addSeparator(JPanel content) {
+        content.add Box.createRigidArea(new Dimension(0, 5))
+        content.add new JSeparator(JSeparator.HORIZONTAL)
+        content.add Box.createRigidArea(new Dimension(0, 5))
+    }
+
+    private static JTextField createPipelineField(Pipeline pipeline) {
+        def pipelineField = new JTextField(pipeline.getName())
+        pipelineField.setForeground ConcourseColors.TEXT
+        pipelineField.setBackground ConcourseColors.TITLEBAR_BACKGROUND
+        pipelineField.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
+        pipelineField.setBorder BorderFactory.createEmptyBorder()
+        pipelineField
     }
 
     private static void addQuitButton(JPanel content) {

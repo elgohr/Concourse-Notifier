@@ -6,14 +6,14 @@ import com.elgohr.concourse.notifier.api.Pipeline
 class Buffer {
 
     private HashMap<String, Job> jobs = new HashMap<>()
-    private HashMap<String, Pipeline> pipelines = new HashMap<>()
+    private List<Pipeline> pipelines = new ArrayList<>()
 
     def getPipelines() {
         return pipelines
     }
 
-    void setPipeline(String pipelineId, Pipeline pipeline) {
-        pipelines.put(pipelineId, pipeline)
+    void setPipeline(Pipeline pipeline) {
+        pipelines.add(pipeline)
     }
 
     def getJobs() {

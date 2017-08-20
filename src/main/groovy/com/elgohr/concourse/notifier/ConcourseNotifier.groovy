@@ -20,7 +20,7 @@ class ConcourseNotifier {
               settings
 
     static void main(String... args) {
-        def settings = new Settings()
+        def settings = new Settings(new Buffer())
         new ConcourseNotifier(
                 args,
                 settings,

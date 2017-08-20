@@ -30,11 +30,10 @@ class BufferSpec extends Specification {
                          new Pipeline("NAME1", "TEAM1", new URL("http://URL"))]
         when:
         pipelines.forEach({
-            buffer.setPipeline(it.name, it)
+            buffer.setPipeline(it)
         })
         then:
-        buffer.getPipelines().values().containsAll(pipelines)
-        buffer.getPipelines().keySet().containsAll(["NAME", "NAME1"])
-        buffer.getPipelines().values().size() == pipelines.size()
+        buffer.getPipelines().containsAll(pipelines)
+        buffer.getPipelines().size() == pipelines.size()
     }
 }
