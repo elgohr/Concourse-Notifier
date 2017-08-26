@@ -41,11 +41,13 @@ class NotificationSchedulerImpl implements NotificationScheduler {
 
     private void updateJobs() {
         for (Pipeline pipeline in concourseService.getPipelines()) {
-            for (Job job in concourseService.getJobs(pipeline)) {
-                if (jobHasChanged(job)) {
-                    log.info "$job.pipeline - $job.name : Changed status to $job.status"
-                    notificationFactory.createNotification(job.name, job.pipeline, job.url.toString(), job.status)
-                    buffer.setJob(job.getKey(), job)
+            if (!pipeline.isPaused()) {
+                for (Job job in concourseService.getJobs(pipeline)) {
+                    if (jobHasChanged(job)) {
+                        log.info "$job.pipeline - $job.name : Changed status to $job.status"
+                        notificationFactory.createNotification(job.name, job.pipeline, job.url.toString(), job.status)
+                        buffer.setJob(job.getKey(), job)
+                    }
                 }
             }
         }
@@ -53,9 +55,11 @@ class NotificationSchedulerImpl implements NotificationScheduler {
 
     private void initializeJobBuffer() {
         for (Pipeline pipeline in concourseService.getPipelines()) {
-            for (Job job in concourseService.getJobs(pipeline)) {
-                buffer.setJob(job.getKey(), job)
-                log.debug "$job.pipeline - $job.name : Added with status $job.status"
+            if (!pipeline.isPaused()) {
+                for (Job job in concourseService.getJobs(pipeline)) {
+                    buffer.setJob(job.getKey(), job)
+                    log.debug "$job.pipeline - $job.name : Added with status $job.status"
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ class Pipeline {
 
     private final String name, team
     private final URL url
+    private boolean paused = false
 
     Pipeline(String name, String team, URL url) {
         this.name = name
@@ -21,5 +22,17 @@ class Pipeline {
 
     def getUrl() {
         return url
+    }
+
+    def pause(){
+        paused = true
+    }
+
+    def resume(){
+        paused = false
+    }
+
+    boolean isPaused() {
+        return paused
     }
 }

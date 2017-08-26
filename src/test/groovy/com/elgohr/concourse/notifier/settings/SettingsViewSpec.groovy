@@ -8,6 +8,7 @@ import spock.lang.Specification
 
 import javax.swing.JButton
 import javax.swing.JLabel
+import javax.swing.JPanel
 import javax.swing.JTextField
 import java.awt.Component
 
@@ -45,8 +46,7 @@ class SettingsViewSpec extends Specification {
         when:
         settings.getSettingsView().showSettings()
         then:
-        def content = settings.getSettingsView()
-                .getDialog().getContentPane().getComponents()[1]
+        def content = getContent()
         findComponentByText(content.getComponents(), "url") != null
         findComponentByText(content.getComponents(), "https://ci.concourse.ci") != null
     }
@@ -78,8 +78,7 @@ class SettingsViewSpec extends Specification {
         when:
         settings.getSettingsView().showSettings()
         then:
-        def content = settings.getSettingsView()
-                .getDialog().getContentPane().getComponents()[1]
+        def content = getContent()
         findComponentByText(content.getComponents(), "quit") != null
     }
 
@@ -110,10 +109,62 @@ class SettingsViewSpec extends Specification {
         2 * bufferMock.getPipelines() >>
                 [new Pipeline("PIPELINE1", "TEAM", new URL("http://URL")),
                  new Pipeline("PIPELINE2", "TEAM1", new URL("http://URL"))]
-        def content = settings.getSettingsView()
-                .getDialog().getContentPane().getComponents()[1]
-        findComponentByText(content.getComponents(), "PIPELINE1") != null
-        findComponentByText(content.getComponents(), "PIPELINE2") != null
+        findComponentByText(getContent().getComponents(), "PIPELINE1") != null
+        findComponentByText(getContent().getComponents(), "PIPELINE2") != null
+    }
+
+    def "shows button to pause pipeline when pipeline is unpaused"() {
+        setup:
+        def unpausedPipeline = new Pipeline("PIPELINE1", "TEAM", new URL("http://URL"))
+
+        when:
+        settings.getSettingsView().showSettings()
+
+        then:
+        bufferMock.getPipelines() >> [unpausedPipeline]
+        findComponentByText(getContent().getComponents(), "||") != null
+    }
+
+    def "does not show button to unpause pipeline when pipeline is unpaused"() {
+        setup:
+        def unpausedPipeline = new Pipeline("PIPELINE1", "TEAM", new URL("http://URL"))
+
+        when:
+        settings.getSettingsView().showSettings()
+
+        then:
+        bufferMock.getPipelines() >> [unpausedPipeline]
+        findComponentByText(getContent().getComponents(), "▶") == null
+    }
+
+    def "shows button to unpause pipelines when pipeline is paused"() {
+        setup:
+        def pausedPipeline = new Pipeline("PIPELINE1", "TEAM", new URL("http://URL"))
+        pausedPipeline.pause()
+
+        when:
+        settings.getSettingsView().showSettings()
+
+        then:
+        bufferMock.getPipelines() >> [pausedPipeline]
+        findComponentByText(getContent().getComponents(), "▶") != null
+    }
+
+    def "does not show button to pause pipeline when pipeline is paused"() {
+        setup:
+        def pausedPipeline = new Pipeline("PIPELINE1", "TEAM", new URL("http://URL"))
+        pausedPipeline.pause()
+
+        when:
+        settings.getSettingsView().showSettings()
+
+        then:
+        bufferMock.getPipelines() >> [pausedPipeline]
+        findComponentByText(getContent().getComponents(), "||") == null
+    }
+
+    private Object getContent() {
+        settings.getSettingsView().getDialog().getContentPane().getComponents()[1]
     }
 
     def "handles view with no pipelines pipelines"() {
@@ -132,6 +183,11 @@ class SettingsViewSpec extends Specification {
                     || component instanceof JLabel)
                     && component.getText() == text) {
                 return component
+            } else if (component instanceof JPanel) {
+                def nestedComponent = findComponentByText(component.getComponents(), text)
+                if (nestedComponent != null) {
+                    return nestedComponent
+                }
             }
         }
         return null

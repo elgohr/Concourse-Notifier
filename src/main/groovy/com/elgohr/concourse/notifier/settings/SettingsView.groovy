@@ -116,9 +116,12 @@ class SettingsView {
         if (pipelines.size() > 0) {
             def lastElement = pipelines.last()
             for (def pipeline in pipelines) {
-                def pipelineField = createPipelineField(pipeline)
-                content.add pipelineField
+                def pipelineLine = new JPanel()
+                pipelineLine.setLayout new BorderLayout()
+                pipelineLine.add createPipelineStateButton(pipeline), BorderLayout.WEST
+                pipelineLine.add createPipelineField(pipeline), BorderLayout.CENTER
 
+                content.add pipelineLine
                 if (isNotLastItem(pipeline, lastElement)) {
                     addSeparator(content)
                 }
@@ -141,31 +144,39 @@ class SettingsView {
         pipelineField.setForeground ConcourseColors.TEXT
         pipelineField.setBackground ConcourseColors.TITLEBAR_BACKGROUND
         pipelineField.setFont new Font(Font.MONOSPACED, Font.PLAIN, 12)
-        pipelineField.setBorder BorderFactory.createEmptyBorder()
+        pipelineField.setBorder BorderFactory.createEmptyBorder(0, 5, 0, 5)
         pipelineField
     }
 
+    private static JButton createPipelineStateButton(Pipeline pipeline) {
+        if (pipeline.isPaused()) {
+            return getButton("▶", null)
+        } else {
+            return getButton("||", null)
+        }
+    }
+
+    private static JButton getButton(String content, ActionListener actionListener) {
+        def button = new JButton(content)
+        button.setBorder BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        button.setForeground ConcourseColors.TEXT
+        button.setBackground ConcourseColors.BACKGROUND
+        button.addActionListener(actionListener)
+        return button
+    }
+
     private static void addQuitButton(JPanel content) {
-        def quitButton = new JButton("quit")
-        quitButton.setBorder BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        quitButton.setForeground ConcourseColors.TEXT
-        quitButton.setBackground ConcourseColors.BACKGROUND
-        quitButton.addActionListener(new CloseApplicationListener())
-        content.add quitButton
+        content.add getButton("quit", new CloseApplicationListener())
     }
 
     private void addSaveButton(JPanel content) {
-        def saveButton = new JButton("save")
-        saveButton.setBorder BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        saveButton.setForeground ConcourseColors.TEXT
-        saveButton.setBackground ConcourseColors.BACKGROUND
-        saveButton.addActionListener(new ActionListener() {
+        def saveListener = new ActionListener() {
             void actionPerformed(ActionEvent e) {
                 saveSettings()
                 dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING))
             }
-        })
-        content.add saveButton
+        }
+        content.add getButton("save", saveListener)
     }
 
     private void saveSettings() {

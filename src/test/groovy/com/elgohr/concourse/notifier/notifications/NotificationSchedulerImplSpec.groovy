@@ -102,4 +102,34 @@ class NotificationSchedulerImplSpec extends Specification {
         then:
         1 * spyCheckPool.scheduleAtFixedRate(_, 0, 5, TimeUnit.SECONDS)
     }
+
+    def "does not check pipelines which are paused on startup"() {
+        setup:
+        def unpausedPipeline = new Pipeline("NAME", "TEAM", new URL("http://URL"))
+        def pausedPipeline = new Pipeline("NAME", "TEAM", new URL("http://URL"))
+        pausedPipeline.pause()
+        mockConcourseService.getPipelines() >> [unpausedPipeline, pausedPipeline]
+
+        mockBuffer.getJobs() >> []
+        when:
+        scheduler.doCheck()
+        then:
+        1 * mockConcourseService.getJobs(unpausedPipeline)
+        0 * mockConcourseService.getJobs(pausedPipeline)
+    }
+
+    def "does not check pipelines which are paused when already initialized"() {
+        setup:
+        def unpausedPipeline = new Pipeline("NAME", "TEAM", new URL("http://URL"))
+        def pausedPipeline = new Pipeline("NAME", "TEAM", new URL("http://URL"))
+        pausedPipeline.pause()
+        mockConcourseService.getPipelines() >> [unpausedPipeline, pausedPipeline]
+
+        mockBuffer.getJobs() >> ["OLD_PIPELINE.OLD_NAME": new Job("OLD_NAME", "OLD_PIPELINE", new URL("http://OLD_URL"), "OLD_STATUS")]
+        when:
+        scheduler.doCheck()
+        then:
+        1 * mockConcourseService.getJobs(unpausedPipeline)
+        0 * mockConcourseService.getJobs(pausedPipeline)
+    }
 }
