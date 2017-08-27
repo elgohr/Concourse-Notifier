@@ -93,7 +93,7 @@ class SettingsViewSpec extends Specification {
         settingsView.showSettings()
         when:
         def content = settingsView.getDialog().getContentPane().getComponents()[1]
-        JButton quitButton = findComponentByText(content.getComponents(), "quit")
+        def quitButton = findComponentByText(content.getComponents(), "quit")
         quitButton.doClick()
         then:
         thrown SecurityException
@@ -163,17 +163,33 @@ class SettingsViewSpec extends Specification {
         findComponentByText(getContent().getComponents(), "||") == null
     }
 
-    private Object getContent() {
-        settings.getSettingsView().getDialog().getContentPane().getComponents()[1]
-    }
-
     def "handles view with no pipelines pipelines"() {
         when:
         settings.getSettingsView().showSettings()
         then:
         2 * bufferMock.getPipelines() >> []
-        settings.getSettingsView()
-                .getDialog().getContentPane().getComponents()[1] != null
+        getContent() != null
+    }
+
+    def "pauses a pipeline when pause button is clicked"() {
+        given:
+        def unpausedPipeline = new Pipeline("PIPELINE1", "TEAM", new URL("http://URL"))
+        when:
+        def button = settings.getSettingsView().createPipelineStateButton(unpausedPipeline)
+        button.doClick()
+        then:
+        unpausedPipeline.isPaused()
+    }
+
+    def "resumes a pipeline when play button is clicked"() {
+        given:
+        def pausedPipeline = new Pipeline("PIPELINE1", "TEAM", new URL("http://URL"))
+        pausedPipeline.pause()
+        when:
+        def button = settings.getSettingsView().createPipelineStateButton(pausedPipeline)
+        button.doClick()
+        then:
+        !pausedPipeline.isPaused()
     }
 
     private static Component findComponentByText(Component[] components, String text) {
@@ -191,5 +207,9 @@ class SettingsViewSpec extends Specification {
             }
         }
         return null
+    }
+
+    private Object getContent() {
+        settings.getSettingsView().getDialog().getContentPane().getComponents()[1]
     }
 }

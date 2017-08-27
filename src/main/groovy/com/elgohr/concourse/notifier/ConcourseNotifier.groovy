@@ -44,7 +44,7 @@ class ConcourseNotifier {
                 concourseService,
                 notificationFactory,
                 Executors.newScheduledThreadPool(1),
-                new Buffer()
+                settings.getBuffer()
         )
         notificationScheduler.startCheck()
     }

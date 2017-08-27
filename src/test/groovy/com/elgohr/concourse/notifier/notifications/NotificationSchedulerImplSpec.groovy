@@ -16,7 +16,7 @@ class NotificationSchedulerImplSpec extends Specification {
     def scheduler, mockConcourseService, mockNotificationFactory, spyCheckPool, mockBuffer
 
     void setup() {
-        def arguments = [new Settings(), Mock(HttpClient)]
+        def arguments = [new Settings(new Buffer()), Mock(HttpClient)]
         mockConcourseService = Mock(ConcourseServiceImpl, constructorArgs: arguments)
         mockNotificationFactory = Mock(NotificationFactoryImpl)
         mockBuffer = Mock(Buffer)
@@ -32,25 +32,57 @@ class NotificationSchedulerImplSpec extends Specification {
         scheduler.stopCheck()
     }
 
-    def "initially loads jobs without notification"() {
+    def "initially loads jobs and pipelines without notification"() {
         given:
         def pipeline1 = new Pipeline("NAME", "TEAM", new URL("http://URL"))
         def pipeline2 = new Pipeline("NAME1", "TEAM1", new URL("http://URL"))
+        def job1 = new Job("NAME", "PIPELINE1", new URL("http://URL"), "STATUS")
+        def job2 = new Job("NAME1", "PIPELINE1", new URL("http://URL"), "STATUS")
+        def job3 = new Job("NAME", "PIPELINE2", new URL("http://URL"), "STATUS")
+        def job4 = new Job("NAME1", "PIPELINE2", new URL("http://URL1"), "STATUS1")
+        def emptyJobBuffer = new HashMap<>()
 
         when:
         scheduler.doCheck()
 
         then:
+        mockBuffer.getJobs() >> emptyJobBuffer
         1 * mockConcourseService.getPipelines() >> [pipeline1, pipeline2]
-        1 * mockConcourseService.getJobs(pipeline1) >>
-                [new Job("NAME", "PIPELINE1", new URL("http://URL"), "STATUS"),
-                 new Job("NAME1", "PIPELINE1", new URL("http://URL1"), "STATUS1")]
-        1 * mockConcourseService.getJobs(pipeline2) >>
-                [new Job("NAME", "PIPELINE2", new URL("http://URL"), "STATUS"),
-                 new Job("NAME1", "PIPELINE2", new URL("http://URL1"), "STATUS1")]
-        1 * mockBuffer.getJobs() >> []
-        4 * mockBuffer.setJob(_, _)
+        1 * mockConcourseService.getJobs(pipeline1) >> [job1, job2]
+        1 * mockConcourseService.getJobs(pipeline2) >> [job3, job4]
+        1 * mockBuffer.setJob("PIPELINE1.NAME", job1)
+        1 * mockBuffer.setJob("PIPELINE1.NAME1", job2)
+        1 * mockBuffer.setJob("PIPELINE2.NAME", job3)
+        1 * mockBuffer.setJob("PIPELINE2.NAME1", job4)
+        1 * mockBuffer.setPipeline(pipeline1)
+        1 * mockBuffer.setPipeline(pipeline2)
         0 * mockNotificationFactory.createNotification(_, _, _, _)
+    }
+
+    def "updates jobs and pipelines"() {
+        given:
+        def pipeline1 = new Pipeline("NAME", "TEAM", new URL("http://URL"))
+        def pipeline2 = new Pipeline("NAME1", "TEAM1", new URL("http://URL"))
+        def job1 = new Job("NAME", "PIPELINE1", new URL("http://URL"), "STATUS")
+        def job2 = new Job("NAME1", "PIPELINE1", new URL("http://URL"), "STATUS")
+        def job3 = new Job("NAME", "PIPELINE2", new URL("http://URL"), "STATUS")
+        def job4 = new Job("NAME1", "PIPELINE2", new URL("http://URL1"), "STATUS1")
+
+        when:
+        scheduler.doCheck()
+
+        then:
+        mockBuffer.getJobs() >>
+                ["NAME.PIPELINE1": new Job("NAME", "PIPELINE1", new URL("http://URL"), "STATUS")]
+        1 * mockConcourseService.getPipelines() >> [pipeline1, pipeline2]
+        1 * mockConcourseService.getJobs(pipeline1) >> [job1, job2]
+        1 * mockConcourseService.getJobs(pipeline2) >> [job3, job4]
+        1 * mockBuffer.setJob("PIPELINE1.NAME", job1)
+        1 * mockBuffer.setJob("PIPELINE1.NAME1", job2)
+        1 * mockBuffer.setJob("PIPELINE2.NAME", job3)
+        1 * mockBuffer.setJob("PIPELINE2.NAME1", job4)
+        1 * mockBuffer.setPipeline(pipeline1)
+        1 * mockBuffer.setPipeline(pipeline2)
     }
 
     def "creates notifications for jobs when added after initialization"() {

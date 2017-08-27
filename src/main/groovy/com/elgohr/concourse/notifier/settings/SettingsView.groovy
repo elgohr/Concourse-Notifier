@@ -5,6 +5,7 @@ import com.elgohr.concourse.notifier.Settings
 import com.elgohr.concourse.notifier.ViewUtil
 import com.elgohr.concourse.notifier.api.Pipeline
 import com.elgohr.concourse.notifier.notifications.ConcourseColors
+import groovy.util.logging.Slf4j
 
 import javax.swing.BorderFactory
 import javax.swing.Box
@@ -30,6 +31,7 @@ import java.awt.event.WindowEvent
 
 import static java.util.Map.Entry
 
+@Slf4j
 class SettingsView {
 
     private Settings settings
@@ -74,7 +76,7 @@ class SettingsView {
         dialog.setAlwaysOnTop true
         dialog.setFocusableWindowState true
         def numberOfPipelines = settings.getBuffer().getPipelines().size()
-        dialog.setPreferredSize new Dimension(300, 160 + (numberOfPipelines * 30))
+        dialog.setPreferredSize new Dimension(300, 180 + (numberOfPipelines * 30))
         dialog.getContentPane().setBackground ConcourseColors.TITLEBAR_BACKGROUND
         dialog
     }
@@ -95,7 +97,7 @@ class SettingsView {
     private void addContent(Container container) {
         def content = new JPanel()
         content.setBackground ConcourseColors.TITLEBAR_BACKGROUND
-        content.setLayout new BoxLayout(content, BoxLayout.Y_AXIS)
+        content.setLayout new BoxLayout(content, BoxLayout.PAGE_AXIS)
         content.setBorder BorderFactory.createEmptyBorder(10, 20, 20, 20)
         container.add content, BorderLayout.CENTER
 
@@ -107,30 +109,24 @@ class SettingsView {
 
         content.add Box.createRigidArea(new Dimension(0, 10))
 
-        addSaveButton(content)
+        content.add getSaveButton()
         content.add Box.createRigidArea(new Dimension(0, 10))
-        addQuitButton(content)
+        content.add getQuitButton()
     }
 
     private static void addPipelines(JPanel content, Collection<Pipeline> pipelines) {
         if (pipelines.size() > 0) {
-            def lastElement = pipelines.last()
             for (def pipeline in pipelines) {
+                addSeparator(content)
                 def pipelineLine = new JPanel()
+                pipelineLine.setAlignmentX JPanel.LEFT_ALIGNMENT
                 pipelineLine.setLayout new BorderLayout()
                 pipelineLine.add createPipelineStateButton(pipeline), BorderLayout.WEST
                 pipelineLine.add createPipelineField(pipeline), BorderLayout.CENTER
 
                 content.add pipelineLine
-                if (isNotLastItem(pipeline, lastElement)) {
-                    addSeparator(content)
-                }
             }
         }
-    }
-
-    private static boolean isNotLastItem(Pipeline current, Pipeline last) {
-        current != last
     }
 
     private static void addSeparator(JPanel content) {
@@ -148,11 +144,23 @@ class SettingsView {
         pipelineField
     }
 
-    private static JButton createPipelineStateButton(Pipeline pipeline) {
+    static def createPipelineStateButton(Pipeline pipeline) {
         if (pipeline.isPaused()) {
-            return getButton("▶", null)
+            def resumeListener = new ActionListener() {
+                void actionPerformed(ActionEvent e) {
+                    log.info "Resuming " + pipeline
+                    pipeline.resume()
+                }
+            }
+            return getButton("▶", resumeListener)
         } else {
-            return getButton("||", null)
+            def pauseListener = new ActionListener() {
+                void actionPerformed(ActionEvent e) {
+                    log.info "Pausing " + pipeline
+                    pipeline.pause()
+                }
+            }
+            return getButton("||", pauseListener)
         }
     }
 
@@ -165,18 +173,18 @@ class SettingsView {
         return button
     }
 
-    private static void addQuitButton(JPanel content) {
-        content.add getButton("quit", new CloseApplicationListener())
+    private static JButton getQuitButton() {
+        return getButton("quit", new CloseApplicationListener())
     }
 
-    private void addSaveButton(JPanel content) {
+    private JButton getSaveButton() {
         def saveListener = new ActionListener() {
             void actionPerformed(ActionEvent e) {
                 saveSettings()
                 dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING))
             }
         }
-        content.add getButton("save", saveListener)
+        return getButton("save", saveListener)
     }
 
     private void saveSettings() {

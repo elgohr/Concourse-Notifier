@@ -13,6 +13,12 @@ class Buffer {
     }
 
     void setPipeline(Pipeline pipeline) {
+        for (int i = 0; i < pipelines.size(); i++) {
+            if (pipeline == pipelines[i]) {
+                pipelines.set(i, pipeline)
+                return
+            }
+        }
         pipelines.add(pipeline)
     }
 

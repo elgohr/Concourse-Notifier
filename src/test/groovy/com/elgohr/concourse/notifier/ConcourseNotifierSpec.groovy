@@ -12,11 +12,12 @@ class ConcourseNotifierSpec extends Specification {
                     "-t", "5",
                     "-d", "6"] as String[]
         def systemTrayMock = Mock(SystemTrayMenu)
+        def buffer = new Buffer()
 
         when:
         def notifier = new ConcourseNotifier(
                 args,
-                new Settings(),
+                new Settings(buffer),
                 systemTrayMock
         )
         then:
@@ -27,6 +28,7 @@ class ConcourseNotifierSpec extends Specification {
         notifier.getSettings().getUrl().toString() == "http://url"
         notifier.getSettings().getCheckTimeInSecs() == 5
         notifier.getSettings().getNotificationTimeoutInSecs() == 6
+        notifier.notificationScheduler.buffer == buffer
 
         1 * systemTrayMock.showIcon()
     }
@@ -39,7 +41,7 @@ class ConcourseNotifierSpec extends Specification {
 
         when:
         def notifier = new ConcourseNotifier(args,
-                new Settings(),
+                new Settings(new Buffer()),
                 Mock(SystemTrayMenu))
 
         then:
